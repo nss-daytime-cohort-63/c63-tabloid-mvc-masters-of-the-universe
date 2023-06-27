@@ -8,3 +8,5 @@ SELECT * FROM Subscription;
 SELECT * FROM Tag;
 SELECT * FROM UserProfile;
 SELECT * FROM UserType;
+
+SELECT id, name FROM Category ORDER BY name
