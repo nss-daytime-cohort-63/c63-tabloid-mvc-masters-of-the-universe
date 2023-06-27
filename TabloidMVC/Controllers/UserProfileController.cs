@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TabloidMVC.Repositories;
 
 namespace TabloidMVC.Controllers
@@ -12,6 +13,7 @@ namespace TabloidMVC.Controllers
         {
             _userProfileRepository = userProfileRepository;
         }
+        [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
             var userProfiles = _userProfileRepository.GetAllUsersOrderedByDisplayName();
