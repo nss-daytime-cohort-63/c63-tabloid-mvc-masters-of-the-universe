@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using System;
 using TabloidMVC.Models;
 using TabloidMVC.Utils;
 
@@ -50,6 +52,38 @@ namespace TabloidMVC.Repositories
                     reader.Close();
 
                     return userProfile;
+                }
+            }
+        }
+
+        public void AddUserProfile(UserProfile user)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO UserProfile
+                                        (DisplayName, FirstName, LastName, Email, CreateDateTime, ImageLocation, UserTypeId)
+                                        OUTPUT INSERTED.ID
+                                        VALUES (@displayName, @firstName, @lastName, @email, @createDateTime, @imageLocation, @userTypeId)";
+
+                    cmd.Parameters.AddWithValue("@displayName", user.DisplayName);
+                    cmd.Parameters.AddWithValue("@firstName", user.FirstName);
+                    cmd.Parameters.AddWithValue("@lastName", user.LastName);
+                    cmd.Parameters.AddWithValue("@email", user.Email);
+                    cmd.Parameters.AddWithValue("@userTypeId", user.UserTypeId);
+                    cmd.Parameters.AddWithValue("@createDateTime", DateTime.Now);
+                    if (user.ImageLocation != null)
+                    {
+                        cmd.Parameters.AddWithValue("@imageLocation", user.ImageLocation);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@imageLocation", DBNull.Value);
+                    }
+                    int id = (int)cmd.ExecuteScalar();
+                    user.Id = id;
                 }
             }
         }
