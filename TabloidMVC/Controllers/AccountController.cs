@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -38,6 +39,7 @@ namespace TabloidMVC.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, userProfile.Id.ToString()),
                 new Claim(ClaimTypes.Email, userProfile.Email),
+                new Claim(ClaimTypes.Role, userProfile.UserType.Name)
             };
 
             var claimsIdentity = new ClaimsIdentity(
@@ -48,6 +50,29 @@ namespace TabloidMVC.Controllers
                 new ClaimsPrincipal(claimsIdentity));
 
             return RedirectToAction("Index", "Home");
+        }
+
+        //create a Register getter
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        //create a Register setter
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Register(UserProfile user)
+        {
+            try
+            {
+                user.UserTypeId = 2;
+                _userProfileRepository.AddUserProfile(user);
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                return View(user);
+            }
         }
 
         public async Task<IActionResult> Logout()
