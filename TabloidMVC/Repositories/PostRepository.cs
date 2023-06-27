@@ -49,6 +49,85 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
+        public List<Post> GetPostsByUserId(int userId)
+        {
+            List<Post> userPosts = new();
+            using (SqlConnection conn = Connection) 
+            {
+                conn.Open();
+                {
+                    using(SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                       SELECT p.Id, p.Title, p.Content, 
+                              p.ImageLocation AS HeaderImage,
+                              p.CreateDateTime, p.PublishDateTime, p.IsApproved,
+                              p.CategoryId, p.UserProfileId,
+                              c.[Name] AS CategoryName,
+                              u.FirstName, u.LastName, u.DisplayName, 
+                              u.Email, u.CreateDateTime, u.ImageLocation AS AvatarImage,
+                              u.UserTypeId, 
+                              ut.[Name] AS UserTypeName
+                         FROM Post p
+                              LEFT JOIN Category c ON p.CategoryId = c.id
+                              LEFT JOIN UserProfile u ON p.UserProfileId = u.id
+                              LEFT JOIN UserType ut ON u.UserTypeId = ut.id
+                        WHERE p.UserProfileId = @userId";
+
+                        cmd.Parameters.AddWithValue("@userId", userId);
+
+                        using(SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                Post _userPost = new Post();
+                                _userPost.Title = reader.GetString(reader.GetOrdinal("Title"));
+                                _userPost.Content = reader.GetString(reader.GetOrdinal("Content"));
+                                _userPost.IsApproved = reader.GetBoolean(reader.GetOrdinal("IsApproved"));
+                                _userPost.Id = reader.GetInt32(reader.GetOrdinal("Id"));
+                                _userPost.CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime"));
+                                _userPost.PublishDateTime = reader.GetDateTime(reader.GetOrdinal("PublishDateTime"));
+                                if(!reader.IsDBNull(reader.GetOrdinal("HeaderImage")))
+                                {
+                                    _userPost.ImageLocation = reader.GetString(reader.GetOrdinal("HeaderImage"));
+                                }
+                                _userPost.UserProfileId = reader.GetInt32(reader.GetOrdinal("UserProfileId"));
+                                _userPost.CategoryId = reader.GetInt32(reader.GetOrdinal("CategoryId"));
+
+                                Category _postCat = new();
+                                _postCat.Name = reader.GetString(reader.GetOrdinal("CategoryName"));
+                                _postCat.Id = reader.GetInt32(reader.GetOrdinal("CategoryId"));
+
+                                _userPost.Category = _postCat;
+
+                                UserProfile _postUser = new();
+                                _postUser.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
+                                _postUser.LastName = reader.GetString(reader.GetOrdinal("LastName"));
+                                _postUser.DisplayName = reader.GetString(reader.GetOrdinal("DisplayName"));
+                                _postUser.Email = reader.GetString(reader.GetOrdinal("Email"));
+                                if(!reader.IsDBNull(reader.GetOrdinal("AvatarImage")))
+                                {
+                                    _postUser.ImageLocation = reader.GetString(reader.GetOrdinal("AvatarImage"));
+                                }
+
+                                _postUser.UserTypeId = reader.GetInt32(reader.GetOrdinal("UserTypeId"));
+
+                                UserType _postUserType = new();
+                                _postUserType.Name = reader.GetString(reader.GetOrdinal("UserTypeName"));
+                                _postUserType.Id = _postUser.UserTypeId;
+
+                                _postUser.UserType = _postUserType;
+
+                                _userPost.UserProfile = _postUser;
+
+                                userPosts.Add(_userPost);
+                            }
+                        }
+                    }
+                }
+            }
+            return userPosts;
+        }
 
         public Post GetPublishedPostById(int id)
         {
@@ -196,6 +275,44 @@ namespace TabloidMVC.Repositories
                     }
                 }
             };
+        }
+
+        public void UpdatePost(Post post)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                    UPDATE Post
+                    SET
+                        Title = @title,
+                        Content = @content,
+                        ImageLocation = @imageLocation,
+                        CreateDateTime = @createDateTime,
+                        PublishDateTime = @publishDateTime,
+                        IsApproved = @isApproved,
+                        CategoryId = @categoryId,
+                        UserProfileId = @userProfileId
+                    WHERE Id = @Id";
+
+                    cmd.Parameters.AddWithValue("@title", post.Title);
+                    cmd.Parameters.AddWithValue("@content", post.Content);
+                    cmd.Parameters.AddWithValue("@imageLocation", post.ImageLocation);
+                    cmd.Parameters.AddWithValue("@createDateTime", post.CreateDateTime);
+                    cmd.Parameters.AddWithValue("@publishDateTime", post.PublishDateTime);
+                    cmd.Parameters.AddWithValue("@isApproved", post.IsApproved);
+                    cmd.Parameters.AddWithValue("@categoryId", post.CategoryId);
+                    cmd.Parameters.AddWithValue("@userProfileId", post.UserProfileId);
+                    cmd.Parameters.AddWithValue("@Id", post.Id);
+
+                    cmd.ExecuteNonQuery();
+
+
+                }
+            }
         }
 
         public void DeletePost(int postId)
