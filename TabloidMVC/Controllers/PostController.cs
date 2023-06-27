@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualBasic;
 using System.Collections.Generic;
+using System;
 using System.Security.Claims;
 using TabloidMVC.Models;
 using TabloidMVC.Models.ViewModels;
@@ -116,6 +117,40 @@ namespace TabloidMVC.Controllers
 
 
 
+        //GET Edit
+        [Authorize]
+        public ActionResult Edit(int id)
+        {
+            int profileId = GetCurrentUserProfileId();
+
+            Post post = _postRepository.GetUserPostById(id, profileId);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            return View(post);
+        }
+
+        //POST Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(Post post)
+        {
+            try
+            {
+                //post.UserProfileId = GetCurrentUserProfileId();
+
+                _postRepository.UpdatePost(post);
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                return View(post);
+            }
+        }
 
         private int GetCurrentUserProfileId()
         {
