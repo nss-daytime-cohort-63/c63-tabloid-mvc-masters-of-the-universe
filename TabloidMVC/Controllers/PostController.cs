@@ -8,8 +8,7 @@ using System.Security.Claims;
 using TabloidMVC.Models;
 using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
-using TabloidMVC.Models;
-using System;
+
 
 namespace TabloidMVC.Controllers
 {
