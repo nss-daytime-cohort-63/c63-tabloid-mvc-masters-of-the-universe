@@ -2,11 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualBasic;
+using System.Collections.Generic;
 using System;
 using System.Security.Claims;
 using TabloidMVC.Models;
 using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
+using TabloidMVC.Models;
+using System;
 
 namespace TabloidMVC.Controllers
 {
@@ -69,6 +72,51 @@ namespace TabloidMVC.Controllers
                 return View(vm);
             }
         }
+        [Authorize]
+        public IActionResult MyPosts()
+        {
+            int currentUserId = GetCurrentUserProfileId();
+            List<Post> myPosts = _postRepository.GetPostsByUserId(currentUserId);
+
+            return View(myPosts);
+        }
+
+        // GET: PostController/Delete
+        [Authorize]
+        public ActionResult Delete(int id)
+        {
+            int userId = GetCurrentUserProfileId();
+            Post post = _postRepository.GetPublishedPostById(id);
+
+            if (post == null || post.UserProfileId != userId)
+            {
+                return NotFound();
+            }
+
+            return View(post);
+        }
+
+        // POST: PostController/Delete
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id, Post post)
+        {
+            try
+            {
+                _postRepository.DeletePost(id);
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex.Message}");
+                return View(post);
+            }
+        }
+
+
+
         //GET Edit
         [Authorize]
         public ActionResult Edit(int id)
