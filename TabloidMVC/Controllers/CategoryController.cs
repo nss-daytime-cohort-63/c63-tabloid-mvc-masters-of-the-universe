@@ -4,6 +4,7 @@ using TabloidMVC.Repositories;
 using TabloidMVC.Models;
 using TabloidMVC.Models.ViewModels;
 using System.Collections.Generic;
+using System;
 
 namespace TabloidMVC.Controllers
 {
@@ -41,14 +42,18 @@ namespace TabloidMVC.Controllers
         // POST: CategoryController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Category category)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+
+                _categoryRepository.AddCategory(category);
+
+                return RedirectToAction("Index");
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"{ex.Message}");
                 return View();
             }
         }
