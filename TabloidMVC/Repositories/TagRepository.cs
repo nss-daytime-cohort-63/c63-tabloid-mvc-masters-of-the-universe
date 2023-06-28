@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Razor.Language.Intermediate;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace TabloidMVC.Repositories
 
 
         public TagRepository(IConfiguration config) : base(config) { }
-        
+
 
         public List<Tag> GetAll()
         {
@@ -41,7 +42,7 @@ namespace TabloidMVC.Repositories
 
                         return tags;
                     }
-                    
+
                 }
             }
         }
@@ -69,13 +70,76 @@ namespace TabloidMVC.Repositories
 
         public void DeleteTag(int tagId)
         {
-            throw new System.NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"Delete from Tag
+                                        where Id = @tagId";
+
+                    cmd.Parameters.AddWithValue("@tagId", tagId);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
 
         public void UpdateTag(Tag tag)
         {
-            throw new System.NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                    UPDATE Tag
+                    SET
+                        [Name] = @name
+                    WHERE Id = @id";
+
+                    cmd.Parameters.AddWithValue("@name", tag.Name);
+                    cmd.Parameters.AddWithValue("@id", tag.Id);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+
+        public Tag GetTagById(int tagId)
+        {
+            Tag tag = null;
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"Select [Name], Id 
+                                        From Tag 
+                                        where Id = @id";
+                    cmd.Parameters.AddWithValue("@id", tagId);
+
+                    using(SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if(reader.Read())
+                        {
+
+                        int _id = reader.GetInt32(reader.GetOrdinal("Id"));
+                        string _name = reader.GetString(reader.GetOrdinal("Name"));
+                        
+                        tag = new() { Id = _id, Name = _name };
+                        return tag;
+                        }
+
+                    }
+                }
+            }
+            return tag;
         }
     }
 }
+    
