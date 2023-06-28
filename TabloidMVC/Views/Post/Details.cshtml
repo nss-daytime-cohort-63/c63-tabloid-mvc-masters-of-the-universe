@@ -16,13 +16,13 @@
             <div class="row justify-content-between">
                 <p class="text-secondary">Written by @Model.Post.UserProfile.DisplayName</p>
                 @{
-                    if (Model.Post.UserProfileId != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)))
+                    if (Model.Post.UserProfileId != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) && Model.ActiveSubscription == null)
                     {
                         <a href="@Url.Action("CreateSubscription", "Post", new { providerId = Model.Post.UserProfileId })">Subscribe to @Model.Post.UserProfile.DisplayName</a>
                     }
-                    if (Model.ActiveSubscription != null)
+                    if (Model.Post.UserProfileId == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) || Model.ActiveSubscription != null)
                     {
-                        <a href="@UrlHelperExtensions.Action("DeleteSubscription", "Post", new List<Subscription> )">Unsubscribe</a>
+                        <a href="@Url.Action("DeleteSubscription", "Post", new {subToDelete = Model.ActiveSubscription} )">Unsubscribe</a>
                     }
                 }
                 @*conditionally render an unsubscribe button*@

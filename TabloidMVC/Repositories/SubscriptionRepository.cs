@@ -28,17 +28,22 @@ namespace TabloidMVC.Repositories
                     cmd.Parameters.AddWithValue("@authorId", authorId);
 
                     SqlDataReader reader = cmd.ExecuteReader();
-
+                    if (reader.Read())
+                    {
                         Subscription sub = new Subscription()
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            SubscriberUserProfileId =  reader.GetInt32(reader.GetOrdinal("SubscriberUserProfileId")),
+                            SubscriberUserProfileId = reader.GetInt32(reader.GetOrdinal("SubscriberUserProfileId")),
                             ProviderUserProfileId = reader.GetInt32(reader.GetOrdinal("ProviderUserProfileId")),
                             BeginDateTime = reader.GetDateTime(reader.GetOrdinal("BeginDateTime")),
                             EndDateTime = null
                         };
-                    reader.Close();
                     return sub;
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
             }
         }
@@ -58,6 +63,21 @@ namespace TabloidMVC.Repositories
                     cmd.Parameters.AddWithValue("@provider", subscription.ProviderUserProfileId);
                     cmd.Parameters.AddWithValue("@beginDate", subscription.BeginDateTime);
                     subscription.Id = (int)cmd.ExecuteScalar();
+                }
+            }
+        }
+
+        public void Delete(Subscription subscription)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"DELETE Subscription
+                                        WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@id", subscription.Id);
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
