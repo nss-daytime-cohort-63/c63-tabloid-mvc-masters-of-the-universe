@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Security.Claims;
+using TabloidMVC.Models;
 using TabloidMVC.Repositories;
 
 
@@ -59,23 +62,35 @@ namespace TabloidMVC.Controllers
         }
 
         // GET: UserProfileController/Edit/5
+        [Authorize]
         public ActionResult Edit(int id)
         {
-            return View();
+            int profileId = GetCurrentUserProfileId();
+
+            UserProfile userProfile = _userProfileRepository.GetUserProfileById(id);
+
+            if (userProfile == null || userProfile.Id != profileId)
+            {
+                return NotFound();
+            }
+
+            return View(userProfile);
         }
 
         // POST: UserProfileController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, UserProfile userProfile)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _userProfileRepository.UpdateUserProfile(userProfile);
+
+                return RedirectToAction("Index");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return View(userProfile);
             }
         }
 
@@ -98,6 +113,12 @@ namespace TabloidMVC.Controllers
             {
                 return View();
             }
+        }
+
+        private int GetCurrentUserProfileId()
+        {
+            string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(id);
         }
     }
 }

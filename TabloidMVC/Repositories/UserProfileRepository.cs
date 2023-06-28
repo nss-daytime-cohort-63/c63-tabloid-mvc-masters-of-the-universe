@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using TabloidMVC.Models;
 using TabloidMVC.Utils;
+using System.Data;
 
 namespace TabloidMVC.Repositories
 {
@@ -196,6 +197,41 @@ namespace TabloidMVC.Repositories
                 }
 
 
+            }
+        }
+
+        public void UpdateUserProfile(UserProfile userProfile)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                    UPDATE UserProfile
+                    SET
+                        DisplayName = @displayName,
+                        FirstName = @firstName,
+                        LastName = @lastName,
+                        Email = @email,
+                        CreateDateTime = @createDateTime,
+                        ImageLocation = @imageLocation,
+                        UserTypeId = @userTypeId,
+                        IsActive = @isActive                        
+                    WHERE Id = @Id";
+
+                    cmd.Parameters.AddWithValue("@displayName", userProfile.DisplayName);
+                    cmd.Parameters.AddWithValue("@firstName", userProfile.FirstName);
+                    cmd.Parameters.AddWithValue("@lastName", userProfile.LastName);
+                    cmd.Parameters.AddWithValue("@email", userProfile.Email);
+                    cmd.Parameters.AddWithValue("@createDateTime", userProfile.CreateDateTime);
+                    cmd.Parameters.AddWithValue("@imageLocation", userProfile.ImageLocation);
+                    cmd.Parameters.AddWithValue("@userTypeId", userProfile.UserTypeId);
+                    cmd.Parameters.AddWithValue("@isActive", userProfile.IsActive);
+
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
     }
