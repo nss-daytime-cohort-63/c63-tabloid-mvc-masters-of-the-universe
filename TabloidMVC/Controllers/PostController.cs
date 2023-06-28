@@ -35,17 +35,23 @@ namespace TabloidMVC.Controllers
 
         public IActionResult Details(int id)
         {
+            PostDetailsViewModel pdvm = new PostDetailsViewModel();
+
             var post = _postRepository.GetPublishedPostById(id);
+            int userId = GetCurrentUserProfileId();
+
             if (post == null)
             {
-                int userId = GetCurrentUserProfileId();
                 post = _postRepository.GetUserPostById(id, userId);
                 if (post == null)
                 {
                     return NotFound();
                 }
             }
-            return View(post);
+            pdvm.Post = post;
+            pdvm.ActiveSubscription = _subscriptionRepository.GetActiveSubByAuthAndSubscriber(post.UserProfileId, userId);
+            //pass a view model with the post and any active subscriptions
+            return View(pdvm);
         }
 
         public IActionResult Create()
@@ -180,6 +186,23 @@ namespace TabloidMVC.Controllers
             }
         }
 
+        //write a DeleteSubscription Action like the above
+        [Authorize]
+        public ActionResult DeleteSubscription(int subToEndId)
+        {
+            try
+            {
+
+                _subscriptionRepository.AddEndDate(subToEndId);
+                return RedirectToAction("Index", "Home");
+            }
+            catch
+            {
+                // Handle errors, if any
+                return Content("Error occurred while ending the subscription.");
+            }
+            
+        }
 
         private int GetCurrentUserProfileId()
         {
