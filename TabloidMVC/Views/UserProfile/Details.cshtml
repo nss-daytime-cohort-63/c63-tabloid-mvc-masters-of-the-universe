@@ -49,8 +49,11 @@
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.ImageLocation)
         </dt>
-        <dd class = "col-sm-10">
+        @*<dd class = "col-sm-10">
             @Html.DisplayFor(model => model.ImageLocation)
+        </dd>*@
+        <dd class="col-sm-10">
+            <img src="@Model.ImageLocation" height="100" alt="avatar" />
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.UserTypeId)
