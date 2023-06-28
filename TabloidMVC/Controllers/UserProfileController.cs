@@ -1,33 +1,69 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TabloidMVC.Models;
 using TabloidMVC.Repositories;
-
 
 namespace TabloidMVC.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserProfileController : Controller
     {
-
-        // Add the UserProfile repository dependency
         private readonly IUserProfileRepository _userProfileRepository;
+        private readonly IUserProfileRepository _userProfileRepo;
 
-        public UserProfileController(IUserProfileRepository userProfileRepository)
+        public UserProfileController(IUserProfileRepository userProfileRepo)
         {
-            _userProfileRepository = userProfileRepository;
+            _userProfileRepository = userProfileRepo;
+            _userProfileRepo = userProfileRepo;
         }
 
         // GET: UserProfileController
-        [Authorize(Roles = "Admin")]
         public ActionResult Index()
         {
             var userProfiles = _userProfileRepository.GetAllUsersOrderedByDisplayName();
-            return View(userProfiles);        
+            return View(userProfiles);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ConfirmDeactivation(int id)
+        {
+            UserProfile userProfile = _userProfileRepo.GetUserProfileById(id);
+
+            if (userProfile == null)
+            {
+                return NotFound();
+            }
+
+            // Deactivate the user profile
+            userProfile.IsActive = false;
+            _userProfileRepo.Update(userProfile);
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ConfirmActivation(int id)
+        {
+            UserProfile userProfile = _userProfileRepo.GetUserProfileById(id);
+
+            if (userProfile == null)
+            {
+                return NotFound();
+            }
+
+            // Activate the user profile
+            userProfile.IsActive = true;
+            _userProfileRepo.Update(userProfile);
+
+            return RedirectToAction("Index");
         }
 
         // GET: UserProfileController/Details/5
         [Authorize]
-            public ActionResult Details(int id)
+        public ActionResult Details(int id)
         {
             var userProfile = _userProfileRepository.GetUserProfileById(id);
             if (userProfile == null)

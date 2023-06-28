@@ -19,16 +19,18 @@ namespace TabloidMVC.Repositories
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                       SELECT u.id, u.FirstName, u.LastName, u.DisplayName, u.Email,
-                              u.CreateDateTime, u.ImageLocation, u.UserTypeId,
-                              ut.[Name] AS UserTypeName
-                         FROM UserProfile u
-                              LEFT JOIN UserType ut ON u.UserTypeId = ut.id
-                        WHERE email = @email";
-                    cmd.Parameters.AddWithValue("@email", email);
+                                        SELECT u.Id, u.FirstName, u.LastName, u.DisplayName, u.Email,
+                                               u.CreateDateTime, u.ImageLocation, u.UserTypeId, u.IsActive,
+                                               ut.[Name] AS UserTypeName
+                                        FROM UserProfile u
+                                        LEFT JOIN UserType ut ON u.UserTypeId = ut.Id
+                                        WHERE email = @email";
+
 
                     UserProfile userProfile = null;
+                    cmd.Parameters.AddWithValue("email", email);
                     var reader = cmd.ExecuteReader();
+
 
                     if (reader.Read())
                     {
@@ -42,6 +44,7 @@ namespace TabloidMVC.Repositories
                             CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
                             ImageLocation = DbUtils.GetNullableString(reader, "ImageLocation"),
                             UserTypeId = reader.GetInt32(reader.GetOrdinal("UserTypeId")),
+                            IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
                             UserType = new UserType()
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("UserTypeId")),
@@ -64,11 +67,14 @@ namespace TabloidMVC.Repositories
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"INSERT INTO UserProfile
-                                        (DisplayName, FirstName, LastName, Email, CreateDateTime, ImageLocation, UserTypeId)
+                    cmd.CommandText = @"
+                                        INSERT INTO UserProfile
+                                        (DisplayName, FirstName, LastName, Email, CreateDateTime, ImageLocation, UserTypeId, IsActive)
                                         OUTPUT INSERTED.ID
-                                        VALUES (@displayName, @firstName, @lastName, @email, @createDateTime, @imageLocation, @userTypeId)";
-
+                                        VALUES (@displayName, @firstName, @lastName, @email,
+                                                @createDateTime, @imageLocation, @userTypeId, @isActive)";
+                    
+                    cmd.Parameters.AddWithValue("@isActive", user.IsActive);
                     cmd.Parameters.AddWithValue("@displayName", user.DisplayName);
                     cmd.Parameters.AddWithValue("@firstName", user.FirstName);
                     cmd.Parameters.AddWithValue("@lastName", user.LastName);
@@ -88,6 +94,7 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
+
         public List<UserProfile> GetAllUsersOrderedByDisplayName()
         {
             using (var conn = Connection)
@@ -96,12 +103,12 @@ namespace TabloidMVC.Repositories
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT u.Id, u.FirstName, u.LastName, u.DisplayName, u.Email,
-                               u.CreateDateTime, u.ImageLocation, u.UserTypeId,
-                               ut.[Name] AS UserTypeName
-                        FROM UserProfile u
-                        LEFT JOIN UserType ut ON u.UserTypeId = ut.Id
-                        ORDER BY u.DisplayName ASC";
+                                        SELECT u.Id, u.FirstName, u.LastName, u.DisplayName, u.Email,
+                                               u.CreateDateTime, u.ImageLocation, u.UserTypeId, u.IsActive,
+                                               ut.[Name] AS UserTypeName
+                                        FROM UserProfile u
+                                        LEFT JOIN UserType ut ON u.UserTypeId = ut.Id
+                                        ORDER BY u.DisplayName ASC";
 
                     var reader = cmd.ExecuteReader();
 
@@ -119,6 +126,7 @@ namespace TabloidMVC.Repositories
                             CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
                             ImageLocation = DbUtils.GetNullableString(reader, "ImageLocation"),
                             UserTypeId = reader.GetInt32(reader.GetOrdinal("UserTypeId")),
+                            IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
                             UserType = new UserType()
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("UserTypeId")),
@@ -146,7 +154,7 @@ namespace TabloidMVC.Repositories
                 {
                     cmd.CommandText = @"
                         SELECT u.Id, u.FirstName, u.LastName, u.DisplayName, u.Email,
-                               u.CreateDateTime, u.ImageLocation, u.UserTypeId,
+                               u.CreateDateTime, u.ImageLocation, u.UserTypeId, u.IsActive,
                                ut.[Name] AS UserTypeName
                         FROM UserProfile u
                         LEFT JOIN UserType ut ON u.UserTypeId = ut.Id
@@ -167,6 +175,7 @@ namespace TabloidMVC.Repositories
                                 Email = reader.GetString(reader.GetOrdinal("Email")),
                                 CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
                                 // ImageLocation = reader.GetString(reader.GetOrdinal("ImageLocation")),
+                                IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
                                 UserTypeId = reader.GetInt32(reader.GetOrdinal("UserTypeId")),
                                 UserType = new UserType
                                 {
@@ -196,6 +205,53 @@ namespace TabloidMVC.Repositories
                 }
 
 
+            }
+        }
+
+        
+        public void UpdateUserProfile(UserProfile user)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"UPDATE UserProfile
+                                SET DisplayName = @displayName,
+                                    FirstName = @firstName,
+                                    LastName = @lastName,
+                                    Email = @email,
+                                    UserTypeId = @userTypeId
+                                WHERE Id = @id";
+
+                    cmd.Parameters.AddWithValue("@id", user.Id);
+                    cmd.Parameters.AddWithValue("@displayName", user.DisplayName);
+                    cmd.Parameters.AddWithValue("@firstName", user.FirstName);
+                    cmd.Parameters.AddWithValue("@lastName", user.LastName);
+                    cmd.Parameters.AddWithValue("@email", user.Email);
+                    cmd.Parameters.AddWithValue("@userTypeId", user.UserTypeId);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        public void Update(UserProfile userProfile)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        UPDATE UserProfile
+                        SET IsActive = @isActive
+                        WHERE Id = @id";
+
+                    cmd.Parameters.AddWithValue("@isActive", userProfile.IsActive);
+                    cmd.Parameters.AddWithValue("@id", userProfile.Id);
+
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
     }
