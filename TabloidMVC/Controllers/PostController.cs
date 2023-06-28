@@ -154,6 +154,7 @@ namespace TabloidMVC.Controllers
             }
         }
 
+        [Authorize]
         public ActionResult CreateSubscription(int providerId)
         {
             try
