@@ -11,7 +11,7 @@ namespace TabloidMVC.Repositories
 
 
         public TagRepository(IConfiguration config) : base(config) { }
-        
+
 
         public List<Tag> GetAll()
         {
@@ -41,7 +41,7 @@ namespace TabloidMVC.Repositories
 
                         return tags;
                     }
-                    
+
                 }
             }
         }
@@ -75,7 +75,61 @@ namespace TabloidMVC.Repositories
 
         public void UpdateTag(Tag tag)
         {
-            throw new System.NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                    UPDATE Tag
+                    SET
+                        [Name] = @name
+                    WHERE Id = @id";
+
+                    cmd.Parameters.AddWithValue("@name", tag.Name);
+                    cmd.Parameters.AddWithValue("@id", tag.Id);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public Tag GetTagById(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                SELECT Id, [Name]
+                FROM Tag
+                WHERE Id = @id";
+
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            Tag tag = new Tag()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Name = reader.GetString(reader.GetOrdinal("Name"))
+                            };
+
+                            return tag;
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                }
+            }
         }
     }
 }
+    
