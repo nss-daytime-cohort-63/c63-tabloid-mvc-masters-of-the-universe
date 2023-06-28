@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Razor.Language.Intermediate;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -89,6 +90,37 @@ namespace TabloidMVC.Repositories
         public void UpdateTag(Tag tag)
         {
             throw new System.NotImplementedException();
+        }
+
+        public Tag GetTagById(int tagId)
+        {
+            Tag tag = null;
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"Select [Name], Id 
+                                        From Tag 
+                                        where Id = @id";
+                    cmd.Parameters.AddWithValue("@id", tagId);
+
+                    using(SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if(reader.Read())
+                        {
+
+                        int _id = reader.GetInt32(reader.GetOrdinal("Id"));
+                        string _name = reader.GetString(reader.GetOrdinal("Name"));
+                        
+                        tag = new() { Id = _id, Name = _name };
+                        return tag;
+                        }
+
+                    }
+                }
+            }
+            return tag;
         }
     }
 }
