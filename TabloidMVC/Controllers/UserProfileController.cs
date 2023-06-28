@@ -4,32 +4,25 @@ using Microsoft.AspNetCore.Mvc;
 using TabloidMVC.Models;
 using TabloidMVC.Repositories;
 
-
 namespace TabloidMVC.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class UserProfileController : Controller
     {
-
-        // Add the UserProfile repository dependency
         private readonly IUserProfileRepository _userProfileRepository;
         private readonly IUserProfileRepository _userProfileRepo;
 
         public UserProfileController(IUserProfileRepository userProfileRepo)
         {
+            _userProfileRepository = userProfileRepo;
             _userProfileRepo = userProfileRepo;
         }
 
         // GET: UserProfileController
-        [Authorize(Roles = "Admin")]
-
         public ActionResult Index()
         {
             var userProfiles = _userProfileRepository.GetAllUsersOrderedByDisplayName();
-            return View(userProfiles);        
-        }
-            var users = _userProfileRepo.GetAllUsersOrderedByDisplayName();
-            return View(users);
+            return View(userProfiles);
         }
 
         [HttpPost]
@@ -61,9 +54,16 @@ namespace TabloidMVC.Controllers
                 return NotFound();
             }
 
+            // Activate the user profile
+            userProfile.IsActive = true;
+            _userProfileRepo.Update(userProfile);
+
+            return RedirectToAction("Index");
+        }
+
         // GET: UserProfileController/Details/5
         [Authorize]
-            public ActionResult Details(int id)
+        public ActionResult Details(int id)
         {
             var userProfile = _userProfileRepository.GetUserProfileById(id);
             if (userProfile == null)
@@ -135,12 +135,5 @@ namespace TabloidMVC.Controllers
                 return View();
             }
         }
-            // Activate the user profile
-            userProfile.IsActive = true;
-            _userProfileRepo.Update(userProfile);
-
-            return RedirectToAction("Index");
-        }
     }
 }
-
