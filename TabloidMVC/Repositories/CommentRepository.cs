@@ -80,7 +80,7 @@ namespace TabloidMVC.Repositories
                 {
                     cmd.CommandText = @"Select co.Id, co.Subject, co.Content, co.CreateDateTime, co.PostId, co.UserProfileId, u.DisplayName, u.ImageLocation
                                         from Comment co
-                                        left join User u on
+                                        left join UserProfile u on
                                         u.Id = co.UserProfileId
                                         where co.PostId = @postId";
                     cmd.Parameters.AddWithValue("@postId", postId);
@@ -89,6 +89,15 @@ namespace TabloidMVC.Repositories
                     {
                         while(reader.Read())
                         {
+                            string ImageLocation;
+                            if (!reader.IsDBNull(reader.GetOrdinal("ImageLocation")))
+                            {
+                                ImageLocation = reader.GetString(reader.GetOrdinal("ImageLocation"));
+                            }
+                            else
+                            {
+                                ImageLocation = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+                            }
                             Comment comment = new Comment()
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
@@ -100,7 +109,7 @@ namespace TabloidMVC.Repositories
                                 UserProfile = new UserProfile()
                                 {
                                     Id = reader.GetInt32(reader.GetOrdinal("UserProfileId")),
-                                    ImageLocation = reader.GetString(reader.GetOrdinal("ImageLocation")),
+                                    ImageLocation = ImageLocation,
                                     DisplayName = reader.GetString(reader.GetOrdinal("DisplayName"))
                                 }
                             };
