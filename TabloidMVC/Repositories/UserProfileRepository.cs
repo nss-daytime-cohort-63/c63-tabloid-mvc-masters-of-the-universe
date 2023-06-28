@@ -135,5 +135,68 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
+
+
+        public UserProfile GetUserProfileById(int id)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT u.Id, u.FirstName, u.LastName, u.DisplayName, u.Email,
+                               u.CreateDateTime, u.ImageLocation, u.UserTypeId,
+                               ut.[Name] AS UserTypeName
+                        FROM UserProfile u
+                        LEFT JOIN UserType ut ON u.UserTypeId = ut.Id
+                        WHERE u.Id = @id
+                        ";
+
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            UserProfile userProfile = new UserProfile
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DisplayName = reader.GetString(reader.GetOrdinal("DisplayName")),
+                                Email = reader.GetString(reader.GetOrdinal("Email")),
+                                CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
+                                // ImageLocation = reader.GetString(reader.GetOrdinal("ImageLocation")),
+                                UserTypeId = reader.GetInt32(reader.GetOrdinal("UserTypeId")),
+                                UserType = new UserType
+                                {
+                                    Name = reader.GetString(reader.GetOrdinal("UserTypeName")),
+                                    Id = reader.GetInt32(reader.GetOrdinal("UserTypeId")),
+                                }
+                            };
+
+                            if (!reader.IsDBNull(reader.GetOrdinal("ImageLocation")))
+                            {
+                                userProfile.ImageLocation = reader.GetString(reader.GetOrdinal("ImageLocation"));
+                            }
+                            //else
+                            //{
+                            //    // default image - do I do this here?
+                            //}
+
+                            return userProfile;
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+
+
+                }
+
+
+            }
+        }
     }
 }
