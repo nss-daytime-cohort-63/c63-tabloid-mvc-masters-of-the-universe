@@ -9,7 +9,6 @@ namespace TabloidMVC.Repositories
         void AddUserProfile(UserProfile user);
         List<UserProfile> GetAllUsersOrderedByDisplayName();
         UserProfile GetUserProfileById(int id);
-        UserProfile GetUserById(int id);
         void UpdateUserProfile(UserProfile user);
         void Update(UserProfile userProfile);
 
