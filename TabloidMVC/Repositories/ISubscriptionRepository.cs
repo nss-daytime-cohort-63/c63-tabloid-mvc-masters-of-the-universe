@@ -8,6 +8,6 @@ namespace TabloidMVC.Repositories
         void Add(Subscription subscription);
         Subscription GetActiveSubByAuthAndSubscriber(int authorId, int subscriberId);
 
-        void Delete(Subscription subscription);
+        void Delete(int subscriptionId);
     }
 }

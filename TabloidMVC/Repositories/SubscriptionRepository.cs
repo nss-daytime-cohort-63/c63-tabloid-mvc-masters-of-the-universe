@@ -67,7 +67,7 @@ namespace TabloidMVC.Repositories
             }
         }
 
-        public void Delete(Subscription subscription)
+        public void Delete(int Id)
         {
             using (SqlConnection conn = Connection)
             {
@@ -76,7 +76,7 @@ namespace TabloidMVC.Repositories
                 {
                     cmd.CommandText = @"DELETE Subscription
                                         WHERE Id = @id";
-                    cmd.Parameters.AddWithValue("@id", subscription.Id);
+                    cmd.Parameters.AddWithValue("@id", Id);
                     cmd.ExecuteNonQuery();
                 }
             }

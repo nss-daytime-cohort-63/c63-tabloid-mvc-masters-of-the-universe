@@ -20,9 +20,9 @@
                     {
                         <a href="@Url.Action("CreateSubscription", "Post", new { providerId = Model.Post.UserProfileId })">Subscribe to @Model.Post.UserProfile.DisplayName</a>
                     }
-                    if (Model.Post.UserProfileId == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) || Model.ActiveSubscription != null)
+                    if (Model.Post.UserProfileId != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) && Model.ActiveSubscription != null)
                     {
-                        <a href="@Url.Action("DeleteSubscription", "Post", new {subToDelete = Model.ActiveSubscription} )">Unsubscribe</a>
+                        <a href="@Url.Action("DeleteSubscription", "Post", new {subToDeleteId = Model.ActiveSubscription.Id} )">Unsubscribe</a>
                     }
                 }
                 @*conditionally render an unsubscribe button*@
