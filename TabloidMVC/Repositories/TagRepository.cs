@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Razor.Language.Intermediate;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -69,7 +70,20 @@ namespace TabloidMVC.Repositories
 
         public void DeleteTag(int tagId)
         {
-            throw new System.NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"Delete from Tag
+                                        where Id = @tagId";
+
+                    cmd.Parameters.AddWithValue("@tagId", tagId);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
 
@@ -129,6 +143,37 @@ namespace TabloidMVC.Repositories
                     }
                 }
             }
+        }
+
+        public Tag GetTagById(int tagId)
+        {
+            Tag tag = null;
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"Select [Name], Id 
+                                        From Tag 
+                                        where Id = @id";
+                    cmd.Parameters.AddWithValue("@id", tagId);
+
+                    using(SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if(reader.Read())
+                        {
+
+                        int _id = reader.GetInt32(reader.GetOrdinal("Id"));
+                        string _name = reader.GetString(reader.GetOrdinal("Name"));
+                        
+                        tag = new() { Id = _id, Name = _name };
+                        return tag;
+                        }
+
+                    }
+                }
+            }
+            return tag;
         }
     }
 }
