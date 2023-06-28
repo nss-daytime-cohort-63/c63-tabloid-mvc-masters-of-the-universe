@@ -10,6 +10,7 @@ using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
 
 
+
 namespace TabloidMVC.Controllers
 {
     [Authorize]
@@ -17,11 +18,13 @@ namespace TabloidMVC.Controllers
     {
         private readonly IPostRepository _postRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly ISubscriptionRepository _subscriptionRepository;
 
-        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository)
+        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository, ISubscriptionRepository subscriptionRepository)
         {
             _postRepository = postRepository;
             _categoryRepository = categoryRepository;
+            _subscriptionRepository = subscriptionRepository;
         }
 
         public IActionResult Index()
@@ -150,6 +153,33 @@ namespace TabloidMVC.Controllers
                 return View(post);
             }
         }
+
+        [Authorize]
+        public ActionResult CreateSubscription(int providerId)
+        {
+            try
+            {
+                // Create a new Subscription object
+                Subscription sub = new Subscription();
+
+                // Set the properties of the Subscription object
+                sub.ProviderUserProfileId = providerId;
+                sub.SubscriberUserProfileId = GetCurrentUserProfileId();
+                sub.BeginDateTime = DateTime.Now;
+
+                // Create the subscription in the database
+                _subscriptionRepository.Add(sub);
+
+                // Redirect the user to the home page or any other desired action
+                return RedirectToAction("Index", "Home");
+            }
+            catch
+            {
+                // Handle errors, if any
+                return Content("Error occurred while creating the subscription.");
+            }
+        }
+
 
         private int GetCurrentUserProfileId()
         {
