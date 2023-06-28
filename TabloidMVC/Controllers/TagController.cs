@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Security.Claims;
+using TabloidMVC.Models;
 using TabloidMVC.Repositories;
 
 namespace TabloidMVC.Controllers
@@ -33,23 +35,28 @@ namespace TabloidMVC.Controllers
         }
 
         // GET: TagController/Create
+        [Authorize(Roles = "Admin")]
         public ActionResult Create()
         {
+            
+
             return View();
         }
 
         // POST: TagController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Tag tag)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _tagRepository.AddTag(tag);
+
+                return RedirectToAction("Index");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return View(tag);
             }
         }
 
