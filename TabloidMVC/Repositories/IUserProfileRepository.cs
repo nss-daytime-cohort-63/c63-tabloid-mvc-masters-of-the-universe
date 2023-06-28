@@ -8,5 +8,6 @@ namespace TabloidMVC.Repositories
         UserProfile GetByEmail(string email);
         void AddUserProfile(UserProfile user);
         List<UserProfile> GetAllUsersOrderedByDisplayName();
+        UserProfile GetUserProfileById(int id);
     }
 }

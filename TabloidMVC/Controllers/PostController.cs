@@ -71,7 +71,7 @@ namespace TabloidMVC.Controllers
                 _postRepository.Add(vm.Post);
 
                 return RedirectToAction("Details", new { id = vm.Post.Id });
-            } 
+            }
             catch
             {
                 vm.CategoryOptions = _categoryRepository.GetAll();
@@ -198,3 +198,6 @@ namespace TabloidMVC.Controllers
         }
     }
 }
+
+
+
