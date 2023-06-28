@@ -52,7 +52,20 @@ namespace TabloidMVC.Repositories
 
         public void DeleteTag(int tagId)
         {
-            throw new System.NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"Delete from Tag
+                                        where Id = @tagId";
+
+                    cmd.Parameters.AddWithValue("@tagId", tagId);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
 
