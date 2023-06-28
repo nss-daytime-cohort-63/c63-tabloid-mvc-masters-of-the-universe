@@ -9,6 +9,8 @@ using TabloidMVC.Models;
 using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
 
+
+
 namespace TabloidMVC.Controllers
 {
     [Authorize]
