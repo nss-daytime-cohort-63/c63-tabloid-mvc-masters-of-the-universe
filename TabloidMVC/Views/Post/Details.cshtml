@@ -13,6 +13,7 @@
             </div>
             <div class="row justify-content-between">
                 <p class="text-secondary">Written by @Model.UserProfile.DisplayName</p>
+                <a href="@Url.Action("CreateSubscription", "Post", new { providerId = Model.UserProfileId })">Subscribe to @Model.UserProfile.DisplayName</a>
                 <p class="text-black-50">Published on @Html.DisplayFor(model => model.PublishDateTime)</p>
             </div>
             <div class="row">
