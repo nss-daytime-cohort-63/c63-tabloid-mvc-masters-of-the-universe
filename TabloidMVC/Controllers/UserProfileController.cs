@@ -29,7 +29,7 @@ namespace TabloidMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ConfirmDeactivation(int id)
         {
-            UserProfile userProfile = _userProfileRepo.GetUserById(id);
+            UserProfile userProfile = _userProfileRepo.GetUserProfileById(id);
 
             if (userProfile == null)
             {
@@ -47,7 +47,7 @@ namespace TabloidMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ConfirmActivation(int id)
         {
-            UserProfile userProfile = _userProfileRepo.GetUserById(id);
+            UserProfile userProfile = _userProfileRepo.GetUserProfileById(id);
 
             if (userProfile == null)
             {
