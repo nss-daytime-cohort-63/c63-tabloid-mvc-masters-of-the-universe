@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
 using TabloidMVC.Models;
-using TabloidMVC.Models;
 using TabloidMVC.Repositories;
 
 namespace TabloidMVC.Controllers
@@ -13,12 +12,10 @@ namespace TabloidMVC.Controllers
     public class UserProfileController : Controller
     {
         private readonly IUserProfileRepository _userProfileRepository;
-        private readonly IUserProfileRepository _userProfileRepo;
 
         public UserProfileController(IUserProfileRepository userProfileRepo)
         {
             _userProfileRepository = userProfileRepo;
-            _userProfileRepo = userProfileRepo;
         }
 
         // GET: UserProfileController
@@ -32,7 +29,7 @@ namespace TabloidMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ConfirmDeactivation(int id)
         {
-            UserProfile userProfile = _userProfileRepo.GetUserProfileById(id);
+            UserProfile userProfile = _userProfileRepository.GetUserProfileById(id);
 
             if (userProfile == null)
             {
@@ -41,7 +38,7 @@ namespace TabloidMVC.Controllers
 
             // Deactivate the user profile
             userProfile.IsActive = false;
-            _userProfileRepo.Update(userProfile);
+            _userProfileRepository.Update(userProfile);
 
             return RedirectToAction("Index");
         }
@@ -50,7 +47,7 @@ namespace TabloidMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ConfirmActivation(int id)
         {
-            UserProfile userProfile = _userProfileRepo.GetUserProfileById(id);
+            UserProfile userProfile = _userProfileRepository.GetUserProfileById(id);
 
             if (userProfile == null)
             {
@@ -59,7 +56,7 @@ namespace TabloidMVC.Controllers
 
             // Activate the user profile
             userProfile.IsActive = true;
-            _userProfileRepo.Update(userProfile);
+            _userProfileRepository.Update(userProfile);
 
             return RedirectToAction("Index");
         }
