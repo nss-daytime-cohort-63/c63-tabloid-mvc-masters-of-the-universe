@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 using TabloidMVC.Models;
 
 namespace TabloidMVC.Repositories
@@ -7,6 +8,40 @@ namespace TabloidMVC.Repositories
     public class SubscriptionRepository : BaseRepository, ISubscriptionRepository
     {
         public SubscriptionRepository(IConfiguration config) : base(config) { }
+
+
+        //need lookup by subscriberId and authorId
+        //will return list of ACTIVE subscriptions
+        public Subscription GetActiveSubByAuthAndSubscriber(int authorId, int subscriberId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT Id, SubscriberUserProfileId, ProviderUserProfileId,	BeginDateTime,	EndDateTime
+                                        FROM Subscription
+                                        WHERE SubscriberUserProfileId = @subId
+                                        AND ProviderUserProfileId = @authorId
+                                        AND EndDateTime IS NULL;";
+                    cmd.Parameters.AddWithValue("@subId", subscriberId);
+                    cmd.Parameters.AddWithValue("@authorId", authorId);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                        Subscription sub = new Subscription()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            SubscriberUserProfileId =  reader.GetInt32(reader.GetOrdinal("SubscriberUserProfileId")),
+                            ProviderUserProfileId = reader.GetInt32(reader.GetOrdinal("ProviderUserProfileId")),
+                            BeginDateTime = reader.GetDateTime(reader.GetOrdinal("BeginDateTime")),
+                            EndDateTime = null
+                        };
+                    reader.Close();
+                    return sub;
+                }
+            }
+        }
 
         public void Add(Subscription subscription)
         {
