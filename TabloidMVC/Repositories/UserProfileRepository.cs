@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using TabloidMVC.Models;
 using TabloidMVC.Utils;
+using System.Data;
 
 namespace TabloidMVC.Repositories
 {
@@ -221,7 +222,8 @@ namespace TabloidMVC.Repositories
                                     FirstName = @firstName,
                                     LastName = @lastName,
                                     Email = @email,
-                                    UserTypeId = @userTypeId
+                                    UserTypeId = @userTypeId,
+                                    IsActive = @isActive
                                 WHERE Id = @id";
 
                     cmd.Parameters.AddWithValue("@id", user.Id);
@@ -230,6 +232,7 @@ namespace TabloidMVC.Repositories
                     cmd.Parameters.AddWithValue("@lastName", user.LastName);
                     cmd.Parameters.AddWithValue("@email", user.Email);
                     cmd.Parameters.AddWithValue("@userTypeId", user.UserTypeId);
+                    cmd.Parameters.AddWithValue("@isActive", user.IsActive);
 
                     cmd.ExecuteNonQuery();
                 }
