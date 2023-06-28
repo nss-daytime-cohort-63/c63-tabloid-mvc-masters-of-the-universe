@@ -10,8 +10,41 @@ namespace TabloidMVC.Repositories
         public SubscriptionRepository(IConfiguration config) : base(config) { }
 
 
-        //need lookup by subscriberId and authorId
-        //will return list of ACTIVE subscriptions
+        //why did I build this???
+        public Subscription GetSubscriptionById(int subscriptionId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT Id, SubscriberUserProfileId, ProviderUserProfileId, BeginDateTime, EndDateTime 
+                                        FROM Subscription
+                                        WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@id", subscriptionId);
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        Subscription sub = new Subscription()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            SubscriberUserProfileId = reader.GetInt32(reader.GetOrdinal("SubscriberUserProfileId")),
+                            ProviderUserProfileId = reader.GetInt32(reader.GetOrdinal("ProviderUserProfileId")),
+                            BeginDateTime = reader.GetDateTime(reader.GetOrdinal("BeginDateTime")),
+                            EndDateTime = reader.GetDateTime(reader.GetOrdinal("EndDateTime"))
+                        };
+                        return sub;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+
+        //lookup by subscriberId and authorId
+        //will return only ACTIVE subscription
         public Subscription GetActiveSubByAuthAndSubscriber(int authorId, int subscriberId)
         {
             using (SqlConnection conn = Connection)
@@ -38,7 +71,7 @@ namespace TabloidMVC.Repositories
                             BeginDateTime = reader.GetDateTime(reader.GetOrdinal("BeginDateTime")),
                             EndDateTime = null
                         };
-                    return sub;
+                        return sub;
                     }
                     else
                     {
@@ -67,15 +100,16 @@ namespace TabloidMVC.Repositories
             }
         }
 
-        public void Delete(int Id)
+        public void AddEndDate(int Id)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"DELETE Subscription
-                                        WHERE Id = @id";
+                    cmd.CommandText = @"UPDATE Subscription
+                                        SET EndDateTime = GETDATE()
+                                        WHERE Id = @id;";
                     cmd.Parameters.AddWithValue("@id", Id);
                     cmd.ExecuteNonQuery();
                 }

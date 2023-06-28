@@ -188,17 +188,18 @@ namespace TabloidMVC.Controllers
 
         //write a DeleteSubscription Action like the above
         [Authorize]
-        public ActionResult DeleteSubscription(int subToDeleteId)
+        public ActionResult DeleteSubscription(int subToEndId)
         {
             try
             {
-                _subscriptionRepository.Delete(subToDeleteId);
+
+                _subscriptionRepository.AddEndDate(subToEndId);
                 return RedirectToAction("Index", "Home");
             }
             catch
             {
                 // Handle errors, if any
-                return Content("Error occurred while deleting the subscription.");
+                return Content("Error occurred while ending the subscription.");
             }
             
         }
