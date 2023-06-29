@@ -65,21 +65,35 @@ namespace TabloidMVC.Controllers
         // GET: CommentController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            if(!(_commentRepo.GetCommentById(id) == null))
+            {
+                Comment _comment = _commentRepo.GetCommentById(id);
+                CommentCreateVM ccvm = new()
+                {
+                    Comment = _comment,
+                    PostId = _comment.PostId
+                };
+                return View(ccvm);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         // POST: CommentController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, CommentCreateVM ccvm)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _commentRepo.EditComment(ccvm.Comment);
+                return RedirectToAction("Details", "Post", new {id = ccvm.Comment.PostId});
             }
             catch
             {
-                return View();
+                return View(ccvm);
             }
         }
 

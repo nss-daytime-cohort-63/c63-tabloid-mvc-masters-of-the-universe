@@ -75,23 +75,39 @@
                     <td>
                         Content
                     </td>
+                    <td>
+                        
+                    </td>
+                    <td>
+                        
+                    </td>
                 </tr>
             </thead>
             <tbody>
                 @{
                     foreach(Comment comment in Model.Comments)
                     {
-                        <tr>
-                            <td>
-                                @comment.UserProfile.DisplayName
-                            </td>
-                            <td>
-                                @comment.Subject
-                            </td>
-                            <td>
-                                @comment.Content
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>
+                                    @comment.UserProfile.DisplayName
+                                </td>
+                                <td>
+                                    @comment.Subject
+                                </td>
+                                <td>
+                                    @comment.Content
+                                </td>
+                                <td>    
+                                    <a asp-action="Edit" asp-controller="Comment" asp-route-id="@comment.Id" class="btn btn-outline-primary mx-1" title="Edit">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a asp-action="Delete" asp-controller="Comment" asp-route-id="@comment.Id" class="btn btn-outline-primary mx-1" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>    
+                                </td>
+                            </tr>
                     }
                 }
             </tbody>
