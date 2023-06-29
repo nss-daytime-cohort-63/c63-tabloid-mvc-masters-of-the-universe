@@ -52,7 +52,7 @@
                 @*<input asp-for="UserTypeId" class="form-control" />*@
                 <select asp-for="UserTypeId" class="form-control">
                     <option value="">Select User Type</option>
-                    @foreach (UserType userType in Model.UserType.Name)
+                    @foreach (UserType userType in Model.UserTypes)
                     {
                         <option value="@userType.Id">@userType.Name</option>
                     }
