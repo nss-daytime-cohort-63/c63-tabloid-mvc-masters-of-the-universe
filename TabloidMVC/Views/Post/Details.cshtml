@@ -97,15 +97,26 @@
                                 <td>
                                     @comment.Content
                                 </td>
-                                <td>    
-                                    <a asp-action="Edit" asp-controller="Comment" asp-route-id="@comment.Id" class="btn btn-outline-primary mx-1" title="Edit">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </a>
+                                <td>
+                                @{
+                                    if (User.IsInRole("Admin") || int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) == comment.UserProfileId)
+                                    {
+                                        <a asp-action="Edit" asp-controller="Comment" asp-route-id="@comment.Id" class="btn btn-outline-primary mx-1" title="Edit">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                        
+                                    }
+                                }
                                 </td>
                                 <td>
-                                    <a asp-action="Delete" asp-controller="Comment" asp-route-id="@comment.Id" class="btn btn-outline-primary mx-1" title="Delete">
-                                        <i class="fas fa-trash"></i>
-                                    </a>    
+                                @{
+                                    if (User.IsInRole("Admin") || int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) == comment.UserProfileId)
+                                    {
+                                        <a asp-action="Delete" asp-controller="Comment" asp-route-id="@comment.Id" class="btn btn-outline-primary mx-1" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>        
+                                    }
+                                }
                                 </td>
                             </tr>
                     }
