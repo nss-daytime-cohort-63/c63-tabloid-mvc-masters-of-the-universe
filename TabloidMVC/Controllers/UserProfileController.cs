@@ -100,6 +100,7 @@ namespace TabloidMVC.Controllers
             int profileId = GetCurrentUserProfileId();
 
             UserProfile userProfile = _userProfileRepository.GetUserProfileById(id);
+            
 
             if (userProfile == null)
             {

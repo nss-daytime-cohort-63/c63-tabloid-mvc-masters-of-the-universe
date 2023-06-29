@@ -49,7 +49,14 @@
             </div>
             <div class="form-group">
                 <label asp-for="UserTypeId" class="control-label"></label>
-                <input asp-for="UserTypeId" class="form-control" />
+                @*<input asp-for="UserTypeId" class="form-control" />*@
+                <select asp-for="UserTypeId" class="form-control">
+                    <option value="">Select User Type</option>
+                    @foreach (UserType userType in Model.UserType.Name)
+                    {
+                        <option value="@userType.Id">@userType.Name</option>
+                    }
+                </select>
                 <span asp-validation-for="UserTypeId" class="text-danger"></span>
             </div>
             <div class="form-group">
