@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TabloidMVC.Models;
@@ -7,6 +8,7 @@ using TabloidMVC.Repositories;
 
 namespace TabloidMVC.Controllers
 {
+    [Authorize]
     public class CommentController : Controller
     {
         private readonly ICommentRepository _commentRepo;
@@ -100,21 +102,24 @@ namespace TabloidMVC.Controllers
         // GET: CommentController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            Comment _comment = _commentRepo.GetCommentById(id);
+            return View(_comment);
         }
 
         // POST: CommentController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Comment comment)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                Comment _comment = _commentRepo.GetCommentById(comment.Id);
+                _commentRepo.DeleteComment(comment.Id);
+                return RedirectToAction("Details", "Post", new {id = _comment.PostId});
             }
             catch
             {
-                return View();
+                return View(comment);
             }
         }
         private int GetCurrentUserProfileId()
