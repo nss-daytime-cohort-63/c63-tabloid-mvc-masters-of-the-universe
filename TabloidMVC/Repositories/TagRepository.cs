@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Razor.Language.Intermediate;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -139,6 +140,41 @@ namespace TabloidMVC.Repositories
                 }
             }
             return tag;
+        }
+        
+        public List<Tag> GetTagsByPostId(int postId)
+        {
+            List<Tag> tags = new List<Tag>();
+
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                            SELECT t.[Name]
+                            FROM Tag t
+                            JOIN PostTag pt ON t.Id = pt.TagId
+                            WHERE pt.PostId = @postId;";
+
+                    cmd.Parameters.AddWithValue("@postId", postId);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        
+                        {
+                            Tag tag = new Tag
+                            {
+                                Name = reader.GetString(reader.GetOrdinal("Name"))
+                            };
+                            
+                            tags.Add(tag);
+                        }
+                    }
+                }
+            }
+            return tags;
         }
     }
 }
