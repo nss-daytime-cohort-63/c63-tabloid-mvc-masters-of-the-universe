@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
 using TabloidMVC.Models;
+using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
 
 namespace TabloidMVC.Controllers
@@ -11,27 +12,40 @@ namespace TabloidMVC.Controllers
     public class TagController : Controller
     {
         private readonly ITagRepository _tagRepository;
+        private readonly IPostRepository _postRepository;
+        private readonly IPostTagRepository _postTagRepository;
 
-        public TagController(ITagRepository tagRepository)
+        public TagController(ITagRepository tagRepository, IPostRepository postRepository, IPostTagRepository postTagRepository)
         {
 
             _tagRepository = tagRepository;
+            _postRepository = postRepository;
+            _postTagRepository = postTagRepository;
         }
 
 
         // GET: TagController
         [Authorize(Roles = "Admin")]
-        public ActionResult Index()
+        public ActionResult Index(int id)
         {
-            var tags = _tagRepository.GetAll();
+            PostTagViewModel ptvm = new PostTagViewModel();
 
-            return View(tags);
+            ptvm.Tags = _tagRepository.GetAll();
+            ptvm.Post = _postRepository.GetPublishedPostById(id);
+
+            return View(ptvm);
         }
 
         // GET: TagController/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var tag = _tagRepository.GetTagById(id);
+
+            if (tag == null)
+            {
+                return NotFound();
+            }
+            return View(tag);
         }
 
         // GET: TagController/Create
@@ -115,6 +129,26 @@ namespace TabloidMVC.Controllers
                 return View();
             }
         }
+
+        public ActionResult AddToPost(int tagId, int postId)
+        {
+            try
+            {
+                PostTag postTag = new PostTag();
+                
+                postTag.PostId = postId;
+                postTag.TagId = tagId;
+
+                _postTagRepository.CreatePostTag(postTag);
+                return RedirectToAction("Details", "Post", new {id = postId});
+            }
+            catch
+            {
+                return Content("That didn't work for some reason or another.");
+            }
+        }
+
+
         private int GetCurrentUserProfileId()
         {
             string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
