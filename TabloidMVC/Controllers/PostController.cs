@@ -29,16 +29,22 @@ namespace TabloidMVC.Controllers
             _tagRepository = tagRepository;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int? tagId)
         {
-            var posts = _postRepository.GetAllPublishedPosts();
-            return View(posts);
+            var tagOptions = _tagRepository.GetAll();
+            var posts = (tagId != null)
+            ? _postRepository.GetPublishedPostsByTagId(tagId.Value)
+            : _postRepository.GetAllPublishedPosts();
+            PostIndexViewModel pivm = new PostIndexViewModel();
+            pivm.Posts = posts;
+            pivm.AllTags = tagOptions;
+            return View(pivm);
         }
 
         public IActionResult PostsByTag(int tagId)
         {
             var posts = _postRepository.GetPublishedPostsByTagId(tagId);
-            return View("FilteredPosts", posts);
+            return View("FilteredPostsByTag", posts);
         }
 
 
@@ -211,7 +217,7 @@ namespace TabloidMVC.Controllers
                 // Handle errors, if any
                 return Content("Error occurred while ending the subscription.");
             }
-            
+
         }
 
         private int GetCurrentUserProfileId()
