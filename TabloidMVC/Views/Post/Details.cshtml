@@ -6,6 +6,13 @@
     ViewData["Title"] = $"Post - {Model.Post.Title}";
 }
 
+@{
+    string content = @Model.Post.Content.Trim();
+    string[] words = content.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+    int wordCount = words.Length;
+    int readTime = (int)Math.Ceiling((double)wordCount / 265);
+}
+
 <div class="container pt-5">
     <div class="post">
         <section class="px-3">
@@ -13,21 +20,31 @@
                 <h1 class="text-secondary">@Model.Post.Title</h1>
                 <h1 class="text-black-50">@Model.Post.Category.Name</h1>
             </div>
-            <div class="row justify-content-between">
-                <p class="text-secondary">Written by @Model.Post.UserProfile.DisplayName</p>
-                @{
-                    if (Model.Post.UserProfileId != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) && Model.ActiveSubscription == null)
-                    {
-                        <a href="@Url.Action("CreateSubscription", "Post", new { providerId = Model.Post.UserProfileId })">Subscribe to @Model.Post.UserProfile.DisplayName</a>
+            <div class="row">
+                <div class="col">
+                    <p class="text-secondary">Written by @Model.Post.UserProfile.DisplayName</p>
+                    @{
+                        if (Model.Post.UserProfileId != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) && Model.ActiveSubscription == null)
+                        {
+                            <a href="@Url.Action("CreateSubscription", "Post", new { providerId = Model.Post.UserProfileId })">Subscribe to @Model.Post.UserProfile.DisplayName</a>
+                        }
+                        if (Model.Post.UserProfileId != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) && Model.ActiveSubscription != null)
+                        {
+                            <a href="@Url.Action("DeleteSubscription", "Post", new {subToEndId = Model.ActiveSubscription.Id} )">Unsubscribe</a>
+                        }
                     }
-                    if (Model.Post.UserProfileId != int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) && Model.ActiveSubscription != null)
+                </div>
+                <div class="col justify-content-end text-right">
+                    <p class="text-black-50">Published on @Html.DisplayFor(model => model.Post.PublishDateTime)</p>
+                    @if (readTime == 1)
                     {
-                        <a href="@Url.Action("DeleteSubscription", "Post", new {subToEndId = Model.ActiveSubscription.Id} )">Unsubscribe</a>
+                        <p class="text-black-50">Estimated read time: 1 minute</p>
                     }
-                }
-                @*conditionally render an unsubscribe button*@
-                @*Must: grab authorId, grab currentUserId, check for subscriptions*@
-                <p class="text-black-50">Published on @Html.DisplayFor(model => model.Post.PublishDateTime)</p>
+                    else
+                    {
+                        <p class="text-black-50">Estimated read time: @readTime minutes</p>
+                    }
+                </div>
             </div>
             <div class="row">
                 <a asp-action="Edit" asp-route-id="@Model.Post.Id" class="btn btn-outline-primary mx-1" title="Edit">
