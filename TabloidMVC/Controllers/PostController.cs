@@ -33,6 +33,13 @@ namespace TabloidMVC.Controllers
             return View(posts);
         }
 
+        public IActionResult PostsByTag(int tagId)
+        {
+            var posts = _postRepository.GetPublishedPostsByTagId(tagId);
+            return View("FilteredPosts", posts);
+        }
+
+
         public IActionResult Details(int id)
         {
             PostDetailsViewModel pdvm = new PostDetailsViewModel();

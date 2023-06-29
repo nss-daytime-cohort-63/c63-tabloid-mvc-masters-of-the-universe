@@ -50,6 +50,10 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
+        public List<Post> GetPublishedPostsByTagId(int tagId) 
+        { 
+            
+        }
         public List<Post> GetPostsByUserId(int userId)
         {
             List<Post> userPosts = new();
