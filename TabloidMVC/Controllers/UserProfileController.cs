@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Security.Claims;
 using TabloidMVC.Models;
 using TabloidMVC.Repositories;
 
@@ -10,12 +12,10 @@ namespace TabloidMVC.Controllers
     public class UserProfileController : Controller
     {
         private readonly IUserProfileRepository _userProfileRepository;
-        private readonly IUserProfileRepository _userProfileRepo;
 
         public UserProfileController(IUserProfileRepository userProfileRepo)
         {
             _userProfileRepository = userProfileRepo;
-            _userProfileRepo = userProfileRepo;
         }
 
         // GET: UserProfileController
@@ -29,7 +29,7 @@ namespace TabloidMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ConfirmDeactivation(int id)
         {
-            UserProfile userProfile = _userProfileRepo.GetUserProfileById(id);
+            UserProfile userProfile = _userProfileRepository.GetUserProfileById(id);
 
             if (userProfile == null)
             {
@@ -38,7 +38,7 @@ namespace TabloidMVC.Controllers
 
             // Deactivate the user profile
             userProfile.IsActive = false;
-            _userProfileRepo.Update(userProfile);
+            _userProfileRepository.Update(userProfile);
 
             return RedirectToAction("Index");
         }
@@ -47,7 +47,7 @@ namespace TabloidMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ConfirmActivation(int id)
         {
-            UserProfile userProfile = _userProfileRepo.GetUserProfileById(id);
+            UserProfile userProfile = _userProfileRepository.GetUserProfileById(id);
 
             if (userProfile == null)
             {
@@ -56,7 +56,7 @@ namespace TabloidMVC.Controllers
 
             // Activate the user profile
             userProfile.IsActive = true;
-            _userProfileRepo.Update(userProfile);
+            _userProfileRepository.Update(userProfile);
 
             return RedirectToAction("Index");
         }
@@ -95,23 +95,35 @@ namespace TabloidMVC.Controllers
         }
 
         // GET: UserProfileController/Edit/5
+        [Authorize]
         public ActionResult Edit(int id)
         {
-            return View();
+            int profileId = GetCurrentUserProfileId();
+
+            UserProfile userProfile = _userProfileRepository.GetUserProfileById(id);
+
+            if (userProfile == null || userProfile.Id != profileId)
+            {
+                return NotFound();
+            }
+
+            return View(userProfile);
         }
 
         // POST: UserProfileController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, UserProfile userProfile)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _userProfileRepository.UpdateUserProfile(userProfile);
+
+                return RedirectToAction("Index");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return View(userProfile);
             }
         }
 
@@ -134,6 +146,12 @@ namespace TabloidMVC.Controllers
             {
                 return View();
             }
+        }
+
+        private int GetCurrentUserProfileId()
+        {
+            string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(id);
         }
     }
 }

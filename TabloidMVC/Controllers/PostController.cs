@@ -20,6 +20,7 @@ namespace TabloidMVC.Controllers
         private readonly ICategoryRepository _categoryRepository;
         private readonly ISubscriptionRepository _subscriptionRepository;
         private readonly ICommentRepository _commentRepository;
+        private readonly ITagRepository _tagRepository;
 
         public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository, ISubscriptionRepository subscriptionRepository, ICommentRepository commentRepository)
         {
@@ -27,6 +28,7 @@ namespace TabloidMVC.Controllers
             _categoryRepository = categoryRepository;
             _subscriptionRepository = subscriptionRepository;
             _commentRepository = commentRepository;
+            _tagRepository = tagRepository;
         }
 
         public IActionResult Index()
@@ -38,6 +40,7 @@ namespace TabloidMVC.Controllers
         public IActionResult Details(int id)
         {
             PostDetailsViewModel pdvm = new PostDetailsViewModel();
+            pdvm.TagsOnPost = _tagRepository.GetTagsByPostId(id);
 
             var post = _postRepository.GetPublishedPostById(id);
             int userId = GetCurrentUserProfileId();

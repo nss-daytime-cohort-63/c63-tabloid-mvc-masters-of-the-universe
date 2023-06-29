@@ -9,6 +9,9 @@ SELECT * FROM Tag;
 SELECT * FROM UserProfile;
 SELECT * FROM UserType;
 
+--Alter table UserProfile
+--add IsActive bit not null default 1;
+
 SELECT u.Id, u.FirstName, u.LastName, u.DisplayName, u.Email,
                                u.CreateDateTime, u.ImageLocation, u.UserTypeId,
                                ut.[Name] AS UserTypeName
@@ -31,3 +34,4 @@ SELECT p.Id, p.Title, p.Content,
                               LEFT JOIN UserType ut ON u.UserTypeId = ut.id
                         WHERE IsApproved = 1 AND PublishDateTime < SYSDATETIME()
                         ORDER BY PublishDateTime DESC
+
