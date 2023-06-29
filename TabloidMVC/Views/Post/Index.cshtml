@@ -1,4 +1,4 @@
-﻿@model IEnumerable<TabloidMVC.Models.Post>
+﻿@model TabloidMVC.Models.ViewModels.PostIndexViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -11,26 +11,39 @@
     <p>
         <a class="btn btn-primary" asp-action="Create">New Post</a>
     </p>
+    <form asp-action="Index" method="get">
+        <div class="form-group">
+            <label for="tagId">Filter by Tag:</label>
+            <select class="form-control" id="tagId" name="tagId">
+                <option value="">All Tags</option>
+                @foreach (var tag in Model.AllTags)
+                {
+                    <option value="@tag.Id">@tag.Name</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
     <table class="table table-striped">
         <thead>
             <tr>
                 <th>
-                    @Html.DisplayNameFor(model => model.Title)
+                    Title
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.UserProfileId)
+                    Author
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.CategoryId)
+                    Category
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.PublishDateTime)
+                    Published
                 </th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var item in Model.Posts)
             {
                 <tr>
                     <td>
