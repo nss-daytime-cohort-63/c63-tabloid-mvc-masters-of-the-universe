@@ -12,6 +12,18 @@ SELECT * FROM UserType;
 --Alter table UserProfile
 --add IsActive bit not null default 1;
 
+--alter table Comment
+--drop constraint FK_Comment_Post;
+
+--alter table Comment
+--add constraint FK_Comment_Post
+--foreign key ([PostId]) references [Post]([Id])
+--on delete cascade;
+
+UPDATE Post
+SET IsApproved = 1
+WHERE Id = 3;
+
 SELECT u.Id, u.FirstName, u.LastName, u.DisplayName, u.Email,
                                u.CreateDateTime, u.ImageLocation, u.UserTypeId,
                                ut.[Name] AS UserTypeName

@@ -95,21 +95,20 @@ namespace TabloidMVC.Controllers
         }
 
         // GET: UserProfileController/Edit/5
-        [Authorize]
         public ActionResult Edit(int id)
         {
             int profileId = GetCurrentUserProfileId();
 
             UserProfile userProfile = _userProfileRepository.GetUserProfileById(id);
 
-            if (userProfile == null || userProfile.Id != profileId)
+            if (userProfile == null)
             {
                 return NotFound();
             }
-
+       
             return View(userProfile);
+        
         }
-
         // POST: UserProfileController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
