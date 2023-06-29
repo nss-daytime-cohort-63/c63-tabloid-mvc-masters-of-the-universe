@@ -47,3 +47,5 @@ SELECT p.Id, p.Title, p.Content,
                         WHERE IsApproved = 1 AND PublishDateTime < SYSDATETIME()
                         ORDER BY PublishDateTime DESC
 
+SELECT Id, Name
+                            FROM UserType;
