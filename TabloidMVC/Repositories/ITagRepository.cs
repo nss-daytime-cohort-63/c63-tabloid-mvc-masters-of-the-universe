@@ -10,5 +10,7 @@ namespace TabloidMVC.Repositories
         void UpdateTag(Tag tag);
         void AddTag(Tag tag);
         Tag GetTagById(int tagID);
+
+        List<Tag> GetTagsByPostId(int postId);
     }
 }

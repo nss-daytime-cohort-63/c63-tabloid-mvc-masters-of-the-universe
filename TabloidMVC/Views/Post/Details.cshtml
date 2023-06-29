@@ -53,6 +53,29 @@
                 <a asp-action="Delete" asp-route-id="@Model.Post.Id" class="btn btn-outline-primary mx-1" title="Delete">
                     <i class="fas fa-trash"></i>
                 </a>
+               </div>
+            
+            <div>
+                <a href="@Url.ActionLink("Index", "Tag", new { id = Model.Post.Id })">Manage Tags</a>
+                </div>
+            <div>
+                <a asp-action="Index">Back to List</a>
+            </div>
+            <div>
+                <form method="post" action="@Url.Action("Details", "PostTag")">
+                    <div class="form-group">
+                        <label for="tag-input">Tags: </label>
+                        <div>
+                            @{foreach (Tag tag in Model.TagsOnPost)
+                            {
+                                <div>
+                                    @tag.Name
+                                </div>
+                            }
+                           }
+                        </div>
+                    </div>
+                </form>
             </div>
         </section>
         <hr />
