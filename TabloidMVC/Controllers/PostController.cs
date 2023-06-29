@@ -19,13 +19,15 @@ namespace TabloidMVC.Controllers
         private readonly IPostRepository _postRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ISubscriptionRepository _subscriptionRepository;
+        private readonly ICommentRepository _commentRepository;
         private readonly ITagRepository _tagRepository;
 
-        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository, ISubscriptionRepository subscriptionRepository, ITagRepository tagRepository)
+        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository, ISubscriptionRepository subscriptionRepository, ICommentRepository commentRepository, ITagRepository tagRepository)
         {
             _postRepository = postRepository;
             _categoryRepository = categoryRepository;
             _subscriptionRepository = subscriptionRepository;
+            _commentRepository = commentRepository;
             _tagRepository = tagRepository;
         }
 
@@ -54,6 +56,7 @@ namespace TabloidMVC.Controllers
             pdvm.Post = post;
             pdvm.ActiveSubscription = _subscriptionRepository.GetActiveSubByAuthAndSubscriber(post.UserProfileId, userId);
             //pass a view model with the post and any active subscriptions
+            pdvm.Comments = _commentRepository.GetPostComments(post.Id);
             return View(pdvm);
         }
 
