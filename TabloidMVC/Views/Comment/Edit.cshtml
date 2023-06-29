@@ -13,9 +13,12 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                <input asp-for="@Model.Comment.Id" class="form-control" type="hidden"/>
+                <input asp-for="@Model.Comment.Id" class="form-control" value="@Model.Comment.Id" type="hidden"/>
 
                 <input asp-for="@Model.PostId" type="hidden" value="@Model.Comment.PostId" />
+
+                <input asp-for="@Model.Comment.UserProfileId" type="hidden" value="@Model.Comment.UserProfileId" />
+                <input asp-for="@Model.Comment.PostId" type="hidden" value="@Model.Comment.PostId" />
 
                 <div class="form-group">
                     <label asp-for="@Model.Comment.Subject" class="control-label"></label>

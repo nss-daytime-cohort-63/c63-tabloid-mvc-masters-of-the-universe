@@ -67,15 +67,22 @@ namespace TabloidMVC.Controllers
         // GET: CommentController/Edit/5
         public ActionResult Edit(int id)
         {
-            if(!(_commentRepo.GetCommentById(id) == null))
+            Comment comment = _commentRepo.GetCommentById(id); 
+            if (User.IsInRole("Admin") || comment.UserProfileId == GetCurrentUserProfileId())
             {
-                Comment _comment = _commentRepo.GetCommentById(id);
-                CommentCreateVM ccvm = new()
+                if (!(comment == null))
                 {
-                    Comment = _comment,
-                    PostId = _comment.PostId
-                };
-                return View(ccvm);
+                    CommentCreateVM ccvm = new()
+                    {
+                        Comment = comment,
+                        PostId = comment.PostId
+                    };
+                    return View(ccvm);
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
             else
             {
@@ -88,22 +95,36 @@ namespace TabloidMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, CommentCreateVM ccvm)
         {
-            try
+            if (User.IsInRole("Admin") || ccvm.Comment.UserProfileId == GetCurrentUserProfileId())
             {
-                _commentRepo.EditComment(ccvm.Comment);
-                return RedirectToAction("Details", "Post", new {id = ccvm.Comment.PostId});
+                try
+                {
+                    _commentRepo.EditComment(ccvm.Comment);
+                    return RedirectToAction("Details", "Post", new {id = ccvm.Comment.PostId});
+                }
+                catch
+                {
+                    return View(ccvm);
+                }
             }
-            catch
+            else
             {
-                return View(ccvm);
+                return NotFound();
             }
         }
 
         // GET: CommentController/Delete/5
         public ActionResult Delete(int id)
         {
-            Comment _comment = _commentRepo.GetCommentById(id);
-            return View(_comment);
+            Comment comment = _commentRepo.GetCommentById(id);
+            if (User.IsInRole("Admin") || comment.UserProfileId == GetCurrentUserProfileId())
+            {
+                return View(comment);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         // POST: CommentController/Delete/5
@@ -111,17 +132,25 @@ namespace TabloidMVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, Comment comment)
         {
-            try
+            Comment _comment = _commentRepo.GetCommentById(id);
+            if (User.IsInRole("Admin") || _comment.UserProfileId == GetCurrentUserProfileId())
             {
-                Comment _comment = _commentRepo.GetCommentById(comment.Id);
-                _commentRepo.DeleteComment(comment.Id);
-                return RedirectToAction("Details", "Post", new {id = _comment.PostId});
+                try
+                {
+                    _commentRepo.DeleteComment(comment.Id);
+                    return RedirectToAction("Details", "Post", new { id = _comment.PostId });
+                }
+                catch
+                {
+                    return View(comment);
+                }
             }
-            catch
+            else
             {
-                return View(comment);
+                return NotFound();
             }
         }
+
         private int GetCurrentUserProfileId()
         {
             string id = User.FindFirstValue(ClaimTypes.NameIdentifier);

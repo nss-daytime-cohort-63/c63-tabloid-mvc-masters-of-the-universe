@@ -51,6 +51,6 @@
     
     <form asp-action="Delete">
         <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <a asp-action="Details" asp-controller="Post" asp-route-id="@Model.PostId">Back to Post</a>
     </form>
 </div>
