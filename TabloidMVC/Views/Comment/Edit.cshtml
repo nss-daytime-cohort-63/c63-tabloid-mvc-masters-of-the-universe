@@ -1,0 +1,47 @@
+﻿@model TabloidMVC.Models.ViewModels.CommentCreateVM
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Comment</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <input asp-for="@Model.Comment.Id" class="form-control" value="@Model.Comment.Id" type="hidden"/>
+
+                <input asp-for="@Model.PostId" type="hidden" value="@Model.Comment.PostId" />
+
+                <input asp-for="@Model.Comment.UserProfileId" type="hidden" value="@Model.Comment.UserProfileId" />
+                <input asp-for="@Model.Comment.PostId" type="hidden" value="@Model.Comment.PostId" />
+
+                <div class="form-group">
+                    <label asp-for="@Model.Comment.Subject" class="control-label"></label>
+                    <input asp-for="@Model.Comment.Subject" class="form-control"/>
+                    <span asp-validation-for="@Model.Comment.Subject" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Comment.Content" class="control-label"></label>
+                    <input asp-for="@Model.Comment.Content" class="form-control"/>
+                    <span asp-validation-for="@Model.Comment.Content" class="text-danger"></span>
+                </div>
+
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Details" asp-controller="Post" asp-route-id="@Model.PostId">Back to Post</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
