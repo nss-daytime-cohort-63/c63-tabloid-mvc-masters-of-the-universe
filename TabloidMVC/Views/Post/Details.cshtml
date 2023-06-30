@@ -96,7 +96,19 @@ string content = @Model.Post.Content.Trim();
         <hr/>
 
         <a asp-controller="Reaction" asp-action="AddReactionToPost" asp-route-postId="@Model.Post.Id">Add Reaction</a>
-
+        <div class="card-body flex-row">
+            @{
+                foreach (Reaction reaction in Model.Reactions)
+                {
+                    <div class="d-inline-block">
+                        <img src="@reaction.ImageLocation" alt="@reaction.Name" width="20px" height="20px" /> - @{
+                           int reactionCount = Model.PostReactions.Where(r => r.ReactionId == reaction.Id).GroupBy(r => r.ReactionId).Count();
+                           <b>@reactionCount</b>
+                        }
+                    </div>
+                }
+            }
+        </div>
         <h3 class="text-center">
             Comments
         </h3>

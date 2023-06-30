@@ -63,6 +63,8 @@ namespace TabloidMVC.Repositories
                         WHERE pr.PostId = @id                                               
                     ";
 
+                    cmd.Parameters.AddWithValue("@id", postId);
+
                     var reader = cmd.ExecuteReader();
 
                     var postReactions = new List<PostReaction>();
