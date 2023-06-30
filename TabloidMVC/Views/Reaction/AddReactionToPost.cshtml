@@ -1,0 +1,46 @@
+﻿@model TabloidMVC.Models.ViewModels.PostReactionViewModel
+
+@{
+    ViewData["Title"] = "Add Reaction To Post";
+}
+
+<h1>Add Reaction to Post</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AddReactionToPost">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                @*<select asp-for="Reactions" asp-items="@(new SelectList(Model.Reactions))">                    
+                    <option value="">Choose an existing reaction.</option>
+                </select>*@
+                <select asp-for="@Model.PostReaction.ReactionId" >
+                    <option>Select a reaction.</option>
+                    @{
+                        foreach(Reaction reaction in Model.Reactions)
+                        {
+                            <option value="@reaction.Id">@reaction.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div>
+                <input asp-for="@Model.PostReaction.PostId" type="hidden"/>
+                <input asp-for="@Model.PostReaction.UserProfileId" value="@Model.PostReaction.UserProfileId" type="hidden" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Details" asp-controller="Post" asp-route-id="@Model.PostReaction.PostId">Back to Post</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

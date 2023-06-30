@@ -7,5 +7,7 @@ namespace TabloidMVC.Models.ViewModels
         public Subscription ActiveSubscription { get; set; }
         public List<Comment> Comments { get; set; }
         public List<Tag> TagsOnPost { get; set; }
+        public List<Reaction> Reactions { get; set; }
+        public List<PostReaction> PostReactions { get; set; }
     }
 }
