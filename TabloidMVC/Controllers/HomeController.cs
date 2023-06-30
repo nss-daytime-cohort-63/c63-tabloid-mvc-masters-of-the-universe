@@ -27,7 +27,9 @@ namespace TabloidMVC.Controllers
         public IActionResult Index()
         {
             List<Post> posts = new List<Post>();
-            //list of subscriptions from subscriber id based on current user Id
+            if (User.Identity.IsAuthenticated)
+            {
+
             List<Subscription> subscriptions = _subscriptionRepository.GetActiveSubscriptionsBySubscriberId(GetCurrentUserProfileId());
 
             //convert subscriptions to list of author Ids
@@ -41,8 +43,10 @@ namespace TabloidMVC.Controllers
                 posts.AddRange(authorsPosts);
             }
 
-            return View(posts);
         }
+            return View(posts);
+            }
+            //list of subscriptions from subscriber id based on current user Id
 
         public IActionResult Privacy()
         {

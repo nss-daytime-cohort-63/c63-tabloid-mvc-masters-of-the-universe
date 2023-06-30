@@ -34,7 +34,10 @@
                 @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
                 @Html.ActionLink("Details", "Details", new { id=item.Id}) |
                 @Html.ActionLink("Delete", "Delete", new { id=item.Id }) |
-                @Html.ActionLink("Add To Post", "AddToPost", "Tag", new { tagId=item.Id, postId =  Model.Post.Id })
+                @if (Model.Post != null)
+                {
+                        @Html.ActionLink("Add To Post", "AddToPost", "Tag", new { tagId=item.Id, postId =  Model.Post.Id })
+                    }
             </td>
         </tr>
 }
