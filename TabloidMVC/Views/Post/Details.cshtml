@@ -102,7 +102,7 @@ string content = @Model.Post.Content.Trim();
                 {
                     <div class="d-inline-block">
                         <img src="@reaction.ImageLocation" alt="@reaction.Name" width="20px" height="20px" /> - @{
-                           int reactionCount = Model.PostReactions.Where(r => r.ReactionId == reaction.Id).GroupBy(r => r.ReactionId).Count();
+                           int reactionCount = Model.PostReactions.Where(r => r.ReactionId == reaction.Id).Count();
                            <b>@reactionCount</b>
                         }
                     </div>
