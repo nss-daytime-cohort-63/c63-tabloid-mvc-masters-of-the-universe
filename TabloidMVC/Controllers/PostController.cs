@@ -33,22 +33,24 @@ namespace TabloidMVC.Controllers
             _userProfileRepository = userProfileRepository;
         }
 
-        public IActionResult Index(int? tagId)
+        public IActionResult Index()
+        {
+            var posts = _postRepository.GetAllPublishedPosts();
+            PostIndexViewModel pivm = new PostIndexViewModel();
+            pivm.Posts = posts;
+            return View(pivm);
+        }
+
+        public IActionResult PostsByTag(int? tagId)
         {
             var tagOptions = _tagRepository.GetAll();
             var posts = (tagId != null)
             ? _postRepository.GetPublishedPostsByTagId(tagId.Value)
             : _postRepository.GetAllPublishedPosts();
-            PostIndexViewModel pivm = new PostIndexViewModel();
-            pivm.Posts = posts;
-            pivm.AllTags = tagOptions;
-            return View(pivm);
-        }
-
-        public IActionResult PostsByTag(int tagId)
-        {
-            var posts = _postRepository.GetPublishedPostsByTagId(tagId);
-            return View("FilteredPostsByTag", posts);
+            FilterPostByTagViewModel vm = new FilterPostByTagViewModel();
+            vm.Posts = posts;
+            vm.AllTags = tagOptions;
+            return View("FilteredPostsByTag", vm);
         }
 
         //GET
