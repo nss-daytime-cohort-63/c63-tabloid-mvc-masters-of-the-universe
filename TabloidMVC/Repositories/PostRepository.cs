@@ -115,6 +115,80 @@ namespace TabloidMVC.Repositories
             }
         }
 
+        public List<Post> GetPublishedPostsByCategoryId(int categoryId)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                SELECT p.Id, p.Title, p.Content, 
+                    p.ImageLocation AS HeaderImage,
+                    p.CreateDateTime, p.PublishDateTime, p.IsApproved,
+                    p.CategoryId, p.UserProfileId,
+                    c.[Name] AS CategoryName,
+                    u.FirstName, u.LastName, u.DisplayName, 
+                    u.Email, u.CreateDateTime, u.ImageLocation AS AvatarImage,
+                    u.UserTypeId
+                FROM Post p
+                    LEFT JOIN Category c ON p.CategoryId = c.id
+                    LEFT JOIN UserProfile u ON p.UserProfileId = u.id
+                WHERE IsApproved = 1 AND PublishDateTime < SYSDATETIME()
+                    AND p.CategoryId = @categoryId
+                ORDER BY PublishDateTime DESC";
+
+                    cmd.Parameters.AddWithValue("@categoryId", categoryId);
+
+                    var reader = cmd.ExecuteReader();
+
+                    var posts = new List<Post>();
+
+                    while (reader.Read())
+                    {
+                        var postId = reader.GetInt32(reader.GetOrdinal("Id"));
+                        var post = posts.FirstOrDefault(p => p.Id == postId);
+                        if (post == null)
+                        {
+                            post = new Post
+                            {
+                                Id = postId,
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Content = reader.GetString(reader.GetOrdinal("Content")),
+                                ImageLocation = reader.IsDBNull(reader.GetOrdinal("HeaderImage")) ? null : reader.GetString(reader.GetOrdinal("HeaderImage")),
+                                CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
+                                PublishDateTime = reader.IsDBNull(reader.GetOrdinal("PublishDateTime")) ? null : reader.GetDateTime(reader.GetOrdinal("PublishDateTime")),
+                                IsApproved = reader.GetBoolean(reader.GetOrdinal("IsApproved")),
+                                CategoryId = reader.GetInt32(reader.GetOrdinal("CategoryId")),
+                                Category = new Category
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("CategoryId")),
+                                    Name = reader.GetString(reader.GetOrdinal("CategoryName"))
+                                },
+                                UserProfileId = reader.GetInt32(reader.GetOrdinal("UserProfileId")),
+                                UserProfile = new UserProfile
+                                {
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                    DisplayName = reader.GetString(reader.GetOrdinal("DisplayName")),
+                                    Email = reader.GetString(reader.GetOrdinal("Email")),
+                                    CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
+                                    ImageLocation = reader.GetString(reader.GetOrdinal("AvatarImage")),
+                                    UserTypeId = reader.GetInt32(reader.GetOrdinal("UserTypeId"))
+                                }
+                            };
+                            posts.Add(post);
+                        }
+                    }
+
+                    reader.Close();
+
+                    return posts;
+                }
+            }
+        }
+
+
         public List<Post> GetPublishedPostsByUserId(int userId)
         {
             using (var conn = Connection)
