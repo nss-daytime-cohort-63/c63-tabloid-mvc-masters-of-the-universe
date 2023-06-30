@@ -8,8 +8,7 @@ using System.Security.Claims;
 using TabloidMVC.Models;
 using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
-
-
+using System.Security.Policy;
 
 namespace TabloidMVC.Controllers
 {
@@ -21,36 +20,72 @@ namespace TabloidMVC.Controllers
         private readonly ISubscriptionRepository _subscriptionRepository;
         private readonly ICommentRepository _commentRepository;
         private readonly ITagRepository _tagRepository;
+        private readonly IUserProfileRepository _userProfileRepository;
         private readonly IReactionRepository _reactionRepository;
 
-        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository, ISubscriptionRepository subscriptionRepository, ICommentRepository commentRepository, ITagRepository tagRepository, IReactionRepository reactionRepository)
+
+        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository, ISubscriptionRepository subscriptionRepository, ICommentRepository commentRepository, ITagRepository tagRepository, IUserProfileRepository userProfileRepository, IReactionRepository reactionRepository
+            )
         {
             _postRepository = postRepository;
             _categoryRepository = categoryRepository;
             _subscriptionRepository = subscriptionRepository;
             _commentRepository = commentRepository;
             _tagRepository = tagRepository;
+            _userProfileRepository = userProfileRepository;
             _reactionRepository = reactionRepository;
         }
 
-        public IActionResult Index(int? tagId)
+        public IActionResult Index()
+        {
+            var posts = _postRepository.GetAllPublishedPosts();
+            PostIndexViewModel pivm = new PostIndexViewModel();
+            pivm.Posts = posts;
+            return View(pivm);
+        }
+
+        public IActionResult PostsByTag(int? tagId)
         {
             var tagOptions = _tagRepository.GetAll();
             var posts = (tagId != null)
             ? _postRepository.GetPublishedPostsByTagId(tagId.Value)
             : _postRepository.GetAllPublishedPosts();
-            PostIndexViewModel pivm = new PostIndexViewModel();
-            pivm.Posts = posts;
-            pivm.AllTags = tagOptions;
-            return View(pivm);
+            FilterPostByTagViewModel vm = new FilterPostByTagViewModel();
+            vm.Posts = posts;
+            vm.AllTags = tagOptions;
+            return View("FilteredPostsByTag", vm);
         }
 
-        public IActionResult PostsByTag(int tagId)
+        public IActionResult PostsByCategory(int? categoryId)
         {
-            var posts = _postRepository.GetPublishedPostsByTagId(tagId);
-            return View("FilteredPostsByTag", posts);
+            var categoryOptions = _categoryRepository.GetAll();
+            var posts = (categoryId != null)
+                ? _postRepository.GetPublishedPostsByCategoryId(categoryId.Value)
+                : _postRepository.GetAllPublishedPosts();
+            FilterPostByCategoryViewModel vm = new FilterPostByCategoryViewModel();
+            vm.Posts = posts;
+            vm.AllCategories = categoryOptions;
+            return View("FilterPostsByCategory", vm);
         }
 
+        public IActionResult PostsByAuthor(int? authorId)
+        {
+            var authorOptions = _userProfileRepository.GetAllUsersOrderedByDisplayName();
+            var posts = (authorId != null)
+                ? _postRepository.GetPublishedPostsByUserId(authorId.Value)
+                : _postRepository.GetAllPublishedPosts();
+            FilterPostByAuthorViewModel vm = new FilterPostByAuthorViewModel();
+            vm.Posts = posts;
+            vm.AllUserProfiles = authorOptions;
+            return View("FilterPostsByAuthor", vm );
+        }
+
+        //GET
+        public IActionResult PostApproval()
+        {
+            var posts = _postRepository.GetAllPosts();
+            return View(posts);
+        }
 
         public IActionResult Details(int id)
         {
@@ -90,7 +125,7 @@ namespace TabloidMVC.Controllers
             try
             {
                 vm.Post.CreateDateTime = DateAndTime.Now;
-                vm.Post.IsApproved = true;
+                vm.Post.IsApproved = false;
                 vm.Post.UserProfileId = GetCurrentUserProfileId();
 
                 _postRepository.Add(vm.Post);
@@ -167,6 +202,7 @@ namespace TabloidMVC.Controllers
         //POST Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public ActionResult Edit(Post post)
         {
             try
@@ -174,8 +210,17 @@ namespace TabloidMVC.Controllers
                 //post.UserProfileId = GetCurrentUserProfileId();
 
                 _postRepository.UpdatePost(post);
+                int profileId = GetCurrentUserProfileId();
+                UserProfile user = _userProfileRepository.GetUserProfileById(profileId);
 
-                return RedirectToAction("Index");
+                if (User.IsInRole("Admin"))
+                {
+                    return RedirectToAction("PostApproval");
+                }
+                else
+                {
+                    return RedirectToAction("Index");
+                }
             }
             catch (Exception ex)
             {

@@ -31,6 +31,7 @@ namespace TabloidMVC.Controllers
             PostTagViewModel ptvm = new PostTagViewModel();
 
             ptvm.Tags = _tagRepository.GetAll();
+            //May not need this line
             ptvm.Post = _postRepository.GetPublishedPostById(id);
 
             return View(ptvm);

@@ -115,6 +115,124 @@ namespace TabloidMVC.Repositories
             }
         }
 
+        public List<Post> GetPublishedPostsByCategoryId(int categoryId)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                SELECT p.Id, p.Title, p.Content, 
+                    p.ImageLocation AS HeaderImage,
+                    p.CreateDateTime, p.PublishDateTime, p.IsApproved,
+                    p.CategoryId, p.UserProfileId,
+                    c.[Name] AS CategoryName,
+                    u.FirstName, u.LastName, u.DisplayName, 
+                    u.Email, u.CreateDateTime, u.ImageLocation AS AvatarImage,
+                    u.UserTypeId
+                FROM Post p
+                    LEFT JOIN Category c ON p.CategoryId = c.id
+                    LEFT JOIN UserProfile u ON p.UserProfileId = u.id
+                WHERE IsApproved = 1 AND PublishDateTime < SYSDATETIME()
+                    AND p.CategoryId = @categoryId
+                ORDER BY PublishDateTime DESC";
+
+                    cmd.Parameters.AddWithValue("@categoryId", categoryId);
+
+                    var reader = cmd.ExecuteReader();
+
+                    var posts = new List<Post>();
+
+                    while (reader.Read())
+                    {
+                        var postId = reader.GetInt32(reader.GetOrdinal("Id"));
+                        var post = posts.FirstOrDefault(p => p.Id == postId);
+                        if (post == null)
+                        {
+                            post = new Post
+                            {
+                                Id = postId,
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Content = reader.GetString(reader.GetOrdinal("Content")),
+                                ImageLocation = reader.IsDBNull(reader.GetOrdinal("HeaderImage")) ? null : reader.GetString(reader.GetOrdinal("HeaderImage")),
+                                CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
+                                PublishDateTime = reader.IsDBNull(reader.GetOrdinal("PublishDateTime")) ? null : reader.GetDateTime(reader.GetOrdinal("PublishDateTime")),
+                                IsApproved = reader.GetBoolean(reader.GetOrdinal("IsApproved")),
+                                CategoryId = reader.GetInt32(reader.GetOrdinal("CategoryId")),
+                                Category = new Category
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("CategoryId")),
+                                    Name = reader.GetString(reader.GetOrdinal("CategoryName"))
+                                },
+                                UserProfileId = reader.GetInt32(reader.GetOrdinal("UserProfileId")),
+                                UserProfile = new UserProfile
+                                {
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                    DisplayName = reader.GetString(reader.GetOrdinal("DisplayName")),
+                                    Email = reader.GetString(reader.GetOrdinal("Email")),
+                                    CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
+                                    ImageLocation = reader.GetString(reader.GetOrdinal("AvatarImage")),
+                                    UserTypeId = reader.GetInt32(reader.GetOrdinal("UserTypeId"))
+                                }
+                            };
+                            posts.Add(post);
+                        }
+                    }
+
+                    reader.Close();
+
+                    return posts;
+                }
+            }
+        }
+
+
+        public List<Post> GetPublishedPostsByUserId(int userId)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                SELECT p.Id, p.Title, p.Content, 
+                       p.ImageLocation AS HeaderImage,
+                       p.CreateDateTime, p.PublishDateTime, p.IsApproved,
+                       p.CategoryId, p.UserProfileId,
+                       c.[Name] AS CategoryName,
+                       u.FirstName, u.LastName, u.DisplayName, 
+                       u.Email, u.CreateDateTime, u.ImageLocation AS AvatarImage,
+                       u.UserTypeId, 
+                       ut.[Name] AS UserTypeName
+                FROM Post p
+                    LEFT JOIN Category c ON p.CategoryId = c.id
+                    LEFT JOIN UserProfile u ON p.UserProfileId = u.id
+                    LEFT JOIN UserType ut ON u.UserTypeId = ut.id
+                WHERE IsApproved = 1 AND PublishDateTime < SYSDATETIME()
+                    AND p.UserProfileId = @userId
+                ORDER BY PublishDateTime DESC";
+
+                    cmd.Parameters.AddWithValue("@userId", userId);
+
+                    var reader = cmd.ExecuteReader();
+
+                    var posts = new List<Post>();
+
+                    while (reader.Read())
+                    {
+                        posts.Add(NewPostFromReader(reader));
+                    }
+
+                    reader.Close();
+
+                    return posts;
+                }
+            }
+        }
+
+
         public List<Post> GetPostsByUserId(int userId)
         {
             List<Post> userPosts = new();
@@ -318,6 +436,7 @@ namespace TabloidMVC.Repositories
                 CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
                 PublishDateTime = DbUtils.GetNullableDateTime(reader, "PublishDateTime"),
                 CategoryId = reader.GetInt32(reader.GetOrdinal("CategoryId")),
+                IsApproved = reader.GetBoolean(reader.GetOrdinal("IsApproved")),
                 Category = new Category()
                 {
                     Id = reader.GetInt32(reader.GetOrdinal("CategoryId")),
@@ -396,6 +515,50 @@ namespace TabloidMVC.Repositories
                     cmd.Parameters.AddWithValue("@id", postId);
 
                     cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public List<Post> GetAllPosts()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using(SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT p.Id, p.Title, p.Content, p.ImageLocation AS Image, p.CreateDateTime, 
+                               p.PublishDateTime, p.IsApproved, p.UserProfileId, 
+                               c.[Name] AS Category
+                        FROM Post p
+                        JOIN Category c ON p.CategoryId = c.Id;";
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<Post> posts = new List<Post>();
+
+                        while (reader.Read())
+                        {
+                            Post post = new Post
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Title = reader.IsDBNull(reader.GetOrdinal("Title")) ? null : reader.GetString(reader.GetOrdinal("Title")),
+                                Content = reader.IsDBNull(reader.GetOrdinal("Content")) ? null : reader.GetString(reader.GetOrdinal("Content")),
+                                ImageLocation = reader.IsDBNull(reader.GetOrdinal("Image")) ? null : reader.GetString(reader.GetOrdinal("Image")),
+                                CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
+                                PublishDateTime = reader.GetDateTime(reader.GetOrdinal("PublishDateTime")),
+                                IsApproved = reader.GetBoolean(reader.GetOrdinal("IsApproved")),
+                                UserProfileId = reader.GetInt32(reader.GetOrdinal("UserProfileId")),
+                                Category =  reader.IsDBNull(reader.GetOrdinal("Category")) ?  null : new Category {  Name = reader.GetString(reader.GetOrdinal("Category")) }
+
+
+                            };
+
+                            posts.Add(post);
+                        }
+
+                        return posts;
+                    }
                 }
             }
         }

@@ -2,9 +2,9 @@
 
 namespace TabloidMVC.Models.ViewModels
 {
-    public class PostIndexViewModel
+    public class FilterPostByAuthorViewModel
     {
         public List<Post> Posts { get; set; }
-
+        public List<UserProfile> AllUserProfiles { get; set; }
     }
 }

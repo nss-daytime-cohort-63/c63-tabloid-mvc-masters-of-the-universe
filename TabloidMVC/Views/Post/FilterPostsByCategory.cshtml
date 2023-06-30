@@ -1,19 +1,19 @@
-﻿@model TabloidMVC.Models.ViewModels.FilterPostByTagViewModel
+﻿@model TabloidMVC.Models.ViewModels.FilterPostByCategoryViewModel
 
 @{
-    ViewData["Title"] = "Filtered Posts By Tag";
+    ViewData["Title"] = "Filtered Posts By Category";
 }
 
 <div class="container pt-5">
     <h1>Filtered Posts</h1>
-    <form asp-action="PostsByTag" method="get">
+    <form asp-action="PostsByCategory" method="get">
         <div class="form-group">
-            <label for="tagId">Filter by Tag:</label>
-            <select class="form-control" id="tagId" name="tagId">
-                <option value="">All Tags</option>
-                @foreach (var tag in Model.AllTags)
+            <label for="categoryId">Filter by Category:</label>
+            <select class="form-control" id="categoryId" name="categoryId">
+                <option value="">All Categories</option>
+                @foreach (var category in Model.AllCategories)
                 {
-                    <option value="@tag.Id">@tag.Name</option>
+                    <option value="@category.Id">@category.Name</option>
                 }
             </select>
         </div>
