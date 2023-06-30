@@ -65,6 +65,18 @@ namespace TabloidMVC.Controllers
             return View("FilterPostsByCategory", vm);
         }
 
+        public IActionResult PostsByAuthor(int? authorId)
+        {
+            var authorOptions = _userProfileRepository.GetAllUsersOrderedByDisplayName();
+            var posts = (authorId != null)
+                ? _postRepository.GetPublishedPostsByUserId(authorId.Value)
+                : _postRepository.GetAllPublishedPosts();
+            FilterPostByAuthorViewModel vm = new FilterPostByAuthorViewModel();
+            vm.Posts = posts;
+            vm.AllUserProfiles = authorOptions;
+            return View("FilterPostsByAuthor", vm );
+        }
+
         //GET
         public IActionResult PostApproval()
         {
