@@ -9,6 +9,7 @@ namespace TabloidMVC.Repositories
         List<Post> GetAllPublishedPosts();
         List<Post> GetPublishedPostsByTagId(int tagId);
         List<Post> GetPublishedPostsByUserId(int userId);
+        List<Post> GetPublishedPostsByCategoryId(int categoryId);
         Post GetPublishedPostById(int id);
         Post GetUserPostById(int id, int userProfileId);
         List<Post> GetPostsByUserId(int userId);

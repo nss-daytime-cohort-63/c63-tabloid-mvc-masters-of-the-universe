@@ -53,6 +53,18 @@ namespace TabloidMVC.Controllers
             return View("FilteredPostsByTag", vm);
         }
 
+        public IActionResult PostsByCategory(int? categoryId)
+        {
+            var categoryOptions = _categoryRepository.GetAll();
+            var posts = (categoryId != null)
+                ? _postRepository.GetPublishedPostsByCategoryId(categoryId.Value)
+                : _postRepository.GetAllPublishedPosts();
+            FilterPostByCategoryViewModel vm = new FilterPostByCategoryViewModel();
+            vm.Posts = posts;
+            vm.AllCategories = categoryOptions;
+            return View("FilterPostsByCategory", vm);
+        }
+
         //GET
         public IActionResult PostApproval()
         {
