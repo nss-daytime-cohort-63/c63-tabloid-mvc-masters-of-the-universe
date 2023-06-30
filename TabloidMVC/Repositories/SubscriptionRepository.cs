@@ -10,20 +10,21 @@ namespace TabloidMVC.Repositories
         public SubscriptionRepository(IConfiguration config) : base(config) { }
 
 
-        //why did I build this???
-        public Subscription GetSubscriptionById(int subscriptionId)
+        public List<Subscription> GetActiveSubscriptionsBySubscriberId(int subscriberId)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT Id, SubscriberUserProfileId, ProviderUserProfileId, BeginDateTime, EndDateTime 
+                    cmd.CommandText = @"SELECT Id, SubscriberUserProfileId, ProviderUserProfileId, BeginDateTime 
                                         FROM Subscription
-                                        WHERE Id = @id";
-                    cmd.Parameters.AddWithValue("@id", subscriptionId);
+                                        WHERE SubscriberUserProfileId = @id
+                                        AND EndDateTime IS NULL;";
+                    cmd.Parameters.AddWithValue("@id", subscriberId);
                     SqlDataReader reader = cmd.ExecuteReader();
-                    if (reader.Read())
+                    List<Subscription> subscriptions = new List<Subscription>();
+                    while(reader.Read())
                     {
                         Subscription sub = new Subscription()
                         {
@@ -31,14 +32,12 @@ namespace TabloidMVC.Repositories
                             SubscriberUserProfileId = reader.GetInt32(reader.GetOrdinal("SubscriberUserProfileId")),
                             ProviderUserProfileId = reader.GetInt32(reader.GetOrdinal("ProviderUserProfileId")),
                             BeginDateTime = reader.GetDateTime(reader.GetOrdinal("BeginDateTime")),
-                            EndDateTime = reader.GetDateTime(reader.GetOrdinal("EndDateTime"))
+                            EndDateTime = null
                         };
-                        return sub;
+
+                        subscriptions.Add(sub);
                     }
-                    else
-                    {
-                        return null;
-                    }
+                    return subscriptions;
                 }
             }
         }
