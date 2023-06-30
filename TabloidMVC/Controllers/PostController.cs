@@ -8,8 +8,7 @@ using System.Security.Claims;
 using TabloidMVC.Models;
 using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
-
-
+using System.Security.Policy;
 
 namespace TabloidMVC.Controllers
 {
@@ -20,18 +19,27 @@ namespace TabloidMVC.Controllers
         private readonly ICategoryRepository _categoryRepository;
         private readonly ISubscriptionRepository _subscriptionRepository;
         private readonly ITagRepository _tagRepository;
+        private readonly IUserProfileRepository _userProfileRepository;
 
-        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository, ISubscriptionRepository subscriptionRepository, ITagRepository tagRepository)
+        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository, ISubscriptionRepository subscriptionRepository, ITagRepository tagRepository, IUserProfileRepository userProfileRepository)
         {
             _postRepository = postRepository;
             _categoryRepository = categoryRepository;
             _subscriptionRepository = subscriptionRepository;
             _tagRepository = tagRepository;
+            _userProfileRepository = userProfileRepository;
         }
 
         public IActionResult Index()
         {
             var posts = _postRepository.GetAllPublishedPosts();
+            return View(posts);
+        }
+
+        //GET
+        public IActionResult PostApproval()
+        {
+            var posts = _postRepository.GetAllPosts();
             return View(posts);
         }
 
@@ -70,7 +78,7 @@ namespace TabloidMVC.Controllers
             try
             {
                 vm.Post.CreateDateTime = DateAndTime.Now;
-                vm.Post.IsApproved = true;
+                vm.Post.IsApproved = false;
                 vm.Post.UserProfileId = GetCurrentUserProfileId();
 
                 _postRepository.Add(vm.Post);
@@ -147,6 +155,7 @@ namespace TabloidMVC.Controllers
         //POST Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public ActionResult Edit(Post post)
         {
             try
@@ -154,8 +163,17 @@ namespace TabloidMVC.Controllers
                 //post.UserProfileId = GetCurrentUserProfileId();
 
                 _postRepository.UpdatePost(post);
+                int profileId = GetCurrentUserProfileId();
+                UserProfile user = _userProfileRepository.GetUserProfileById(profileId);
 
-                return RedirectToAction("Index");
+                if (User.IsInRole("Admin"))
+                {
+                    return RedirectToAction("PostApproval");
+                }
+                else
+                {
+                    return RedirectToAction("Index");
+                }
             }
             catch (Exception ex)
             {
