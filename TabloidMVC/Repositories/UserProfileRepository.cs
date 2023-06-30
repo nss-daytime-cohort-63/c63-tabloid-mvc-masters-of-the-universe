@@ -209,6 +209,40 @@ namespace TabloidMVC.Repositories
             }
         }
 
+        public List<UserType> GetAllUserTypes()
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id, Name
+                            FROM UserType;
+                            ";
+
+                    var reader = cmd.ExecuteReader();
+
+                    var userTypes = new List<UserType>();
+
+                    while (reader.Read())
+                    {
+                        var userType = new UserType()
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("Name"))
+                        };
+
+                        userTypes.Add(userType);
+                    }
+
+                    reader.Close();
+
+                    return userTypes;
+                }
+            }        
+        }
+
         
         public void UpdateUserProfile(UserProfile user)
         {

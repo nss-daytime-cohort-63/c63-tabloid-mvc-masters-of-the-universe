@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Reflection.PortableExecutable;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -50,6 +51,114 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
+        public List<Post> GetPublishedPostsByTagId(int tagId)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+               SELECT p.Id, p.Title, p.Content, 
+                      p.ImageLocation AS HeaderImage,
+                      p.CreateDateTime, p.PublishDateTime, p.IsApproved,
+                      p.CategoryId, p.UserProfileId,
+                      c.[Name] AS CategoryName,
+                      u.FirstName, u.LastName, u.DisplayName, 
+                      u.Email, u.CreateDateTime, u.ImageLocation AS AvatarImage,
+                      u.UserTypeId, 
+                      ut.[Name] AS UserTypeName,
+                      t.Id AS TagId, t.Name AS TagName
+                 FROM Post p
+                      LEFT JOIN Category c ON p.CategoryId = c.id
+                      LEFT JOIN UserProfile u ON p.UserProfileId = u.id
+                      LEFT JOIN UserType ut ON u.UserTypeId = ut.id
+                      LEFT JOIN PostTag pt ON pt.PostId = p.id
+                      LEFT JOIN Tag t ON pt.TagId = t.id
+                WHERE IsApproved = 1 AND PublishDateTime < SYSDATETIME()
+                      AND pt.TagId = @tagId
+                ORDER BY PublishDateTime DESC";
+
+                    cmd.Parameters.AddWithValue("@tagId", tagId);
+
+                    var reader = cmd.ExecuteReader();
+
+                    var posts = new List<Post>();
+
+                    while (reader.Read())
+                    {
+                        var postId = reader.GetInt32(reader.GetOrdinal("Id"));
+                        var post = posts.FirstOrDefault(p => p.Id == postId);
+                        if (post == null)
+                        {
+                            post = NewPostFromReader(reader);
+                            posts.Add(post);
+                        }
+
+                        var tagIdFromReader = reader.GetInt32(reader.GetOrdinal("TagId"));
+                        var tagNameFromReader = reader.GetString(reader.GetOrdinal("TagName"));
+                        if (tagIdFromReader > 0 && !string.IsNullOrEmpty(tagNameFromReader))
+                        {
+                            if (post.Tags == null)
+                            {
+                                post.Tags = new List<Tag>();
+                            }
+                            post.Tags.Add(new Tag { Id = tagIdFromReader, Name = tagNameFromReader });
+                        }
+
+                    }
+
+                    reader.Close();
+
+                    return posts;
+                }
+            }
+        }
+
+        public List<Post> GetPublishedPostsByUserId(int userId)
+        {
+            using (var conn = Connection)
+            {
+                conn.Open();
+                using (var cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                SELECT p.Id, p.Title, p.Content, 
+                       p.ImageLocation AS HeaderImage,
+                       p.CreateDateTime, p.PublishDateTime, p.IsApproved,
+                       p.CategoryId, p.UserProfileId,
+                       c.[Name] AS CategoryName,
+                       u.FirstName, u.LastName, u.DisplayName, 
+                       u.Email, u.CreateDateTime, u.ImageLocation AS AvatarImage,
+                       u.UserTypeId, 
+                       ut.[Name] AS UserTypeName
+                FROM Post p
+                    LEFT JOIN Category c ON p.CategoryId = c.id
+                    LEFT JOIN UserProfile u ON p.UserProfileId = u.id
+                    LEFT JOIN UserType ut ON u.UserTypeId = ut.id
+                WHERE IsApproved = 1 AND PublishDateTime < SYSDATETIME()
+                    AND p.UserProfileId = @userId
+                ORDER BY PublishDateTime DESC";
+
+                    cmd.Parameters.AddWithValue("@userId", userId);
+
+                    var reader = cmd.ExecuteReader();
+
+                    var posts = new List<Post>();
+
+                    while (reader.Read())
+                    {
+                        posts.Add(NewPostFromReader(reader));
+                    }
+
+                    reader.Close();
+
+                    return posts;
+                }
+            }
+        }
+
+
         public List<Post> GetPostsByUserId(int userId)
         {
             List<Post> userPosts = new();

@@ -12,5 +12,7 @@ namespace TabloidMVC.Repositories
         void UpdateUserProfile(UserProfile user);
         void Update(UserProfile userProfile);
 
+        List<UserType> GetAllUserTypes();
+
     }
 }

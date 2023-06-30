@@ -7,7 +7,7 @@ namespace TabloidMVC.Repositories
     {
         void Add(Subscription subscription);
         Subscription GetActiveSubByAuthAndSubscriber(int authorId, int subscriberId);
-        Subscription GetSubscriptionById(int id);
+        List<Subscription> GetActiveSubscriptionsBySubscriberId(int subscriberId);
         void AddEndDate(int subscriptionId);
     }
 }

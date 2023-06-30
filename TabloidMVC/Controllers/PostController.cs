@@ -18,22 +18,37 @@ namespace TabloidMVC.Controllers
         private readonly IPostRepository _postRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ISubscriptionRepository _subscriptionRepository;
+        private readonly ICommentRepository _commentRepository;
         private readonly ITagRepository _tagRepository;
         private readonly IUserProfileRepository _userProfileRepository;
 
-        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository, ISubscriptionRepository subscriptionRepository, ITagRepository tagRepository, IUserProfileRepository userProfileRepository)
+        
+        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository, ISubscriptionRepository subscriptionRepository, ICommentRepository commentRepository, ITagRepository tagRepository, IUserProfileRepository userProfileRepository)
         {
             _postRepository = postRepository;
             _categoryRepository = categoryRepository;
             _subscriptionRepository = subscriptionRepository;
+            _commentRepository = commentRepository;
             _tagRepository = tagRepository;
             _userProfileRepository = userProfileRepository;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int? tagId)
         {
-            var posts = _postRepository.GetAllPublishedPosts();
-            return View(posts);
+            var tagOptions = _tagRepository.GetAll();
+            var posts = (tagId != null)
+            ? _postRepository.GetPublishedPostsByTagId(tagId.Value)
+            : _postRepository.GetAllPublishedPosts();
+            PostIndexViewModel pivm = new PostIndexViewModel();
+            pivm.Posts = posts;
+            pivm.AllTags = tagOptions;
+            return View(pivm);
+        }
+
+        public IActionResult PostsByTag(int tagId)
+        {
+            var posts = _postRepository.GetPublishedPostsByTagId(tagId);
+            return View("FilteredPostsByTag", posts);
         }
 
         //GET
@@ -62,6 +77,7 @@ namespace TabloidMVC.Controllers
             pdvm.Post = post;
             pdvm.ActiveSubscription = _subscriptionRepository.GetActiveSubByAuthAndSubscriber(post.UserProfileId, userId);
             //pass a view model with the post and any active subscriptions
+            pdvm.Comments = _commentRepository.GetPostComments(post.Id);
             return View(pdvm);
         }
 
@@ -222,7 +238,7 @@ namespace TabloidMVC.Controllers
                 // Handle errors, if any
                 return Content("Error occurred while ending the subscription.");
             }
-            
+
         }
 
         private int GetCurrentUserProfileId()

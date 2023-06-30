@@ -21,8 +21,8 @@ SET IDENTITY_INSERT [Tag] OFF
 
 SET IDENTITY_INSERT [UserProfile] ON
 INSERT INTO [UserProfile] (
-	[Id], [FirstName], [LastName], [DisplayName], [Email], [CreateDateTime], [ImageLocation], [UserTypeId])
-VALUES (1, 'Admina', 'Strator', 'admin', 'admin@example.com', SYSDATETIME(), NULL, 1);
+	[Id], [FirstName], [LastName], [DisplayName], [Email], [CreateDateTime], [ImageLocation], [UserTypeId], [IsActive])
+VALUES (1, 'Admina', 'Strator', 'admin', 'admin@example.com', SYSDATETIME(), NULL, 1, 1);
 SET IDENTITY_INSERT [UserProfile] OFF
 
 SET IDENTITY_INSERT [Post] ON

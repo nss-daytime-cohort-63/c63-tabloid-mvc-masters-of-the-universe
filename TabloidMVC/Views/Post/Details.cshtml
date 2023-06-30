@@ -1,4 +1,5 @@
 ﻿@using System.Security.Claims;
+@using TabloidMVC.Models;
 
 @model TabloidMVC.Models.ViewModels.PostDetailsViewModel
 
@@ -7,7 +8,9 @@
 }
 
 @{
-    string content = @Model.Post.Content.Trim();
+    Comment commentWithPostIdOnly = new Comment();
+    commentWithPostIdOnly.PostId = Model.Post.Id;
+string content = @Model.Post.Content.Trim();
     string[] words = content.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
     int wordCount = words.Length;
     int readTime = (int)Math.Ceiling((double)wordCount / 265);
@@ -90,5 +93,72 @@
         <section class="row post__content">
             <p class="col-sm-12 mt-5">@Html.DisplayFor(model => model.Post.Content)</p>
         </section>
+        <hr/>
+
+        <h3 class="text-center">
+            Comments
+        </h3>
+
+        <a asp-controller="Comment" asp-action="Create" asp-route-postId="@Model.Post.Id">Add Comment</a>
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>
+                        Author
+                    </td>
+                    <td>
+                        Subject
+                    </td>
+                    <td>
+                        Content
+                    </td>
+                    <td>
+                        
+                    </td>
+                    <td>
+                        
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    foreach(Comment comment in Model.Comments)
+                    {
+                            <tr>
+                                <td>
+                                    @comment.UserProfile.DisplayName
+                                </td>
+                                <td>
+                                    @comment.Subject
+                                </td>
+                                <td>
+                                    @comment.Content
+                                </td>
+                                <td>
+                                @{
+                                    if (User.IsInRole("Admin") || int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) == comment.UserProfileId)
+                                    {
+                                        <a asp-action="Edit" asp-controller="Comment" asp-route-id="@comment.Id" class="btn btn-outline-primary mx-1" title="Edit">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                        
+                                    }
+                                }
+                                </td>
+                                <td>
+                                @{
+                                    if (User.IsInRole("Admin") || int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) == comment.UserProfileId)
+                                    {
+                                        <a asp-action="Delete" asp-controller="Comment" asp-route-id="@comment.Id" class="btn btn-outline-primary mx-1" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>        
+                                    }
+                                }
+                                </td>
+                            </tr>
+                    }
+                }
+            </tbody>
+        </table>
     </div>
 </div>

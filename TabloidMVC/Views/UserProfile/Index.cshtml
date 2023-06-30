@@ -35,7 +35,7 @@
                 @Html.DisplayNameFor(model => model.ImageLocation)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.UserTypeId)
+                @Html.DisplayNameFor(model => model.UserType)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.FullName)
@@ -69,7 +69,7 @@
                     @Html.DisplayFor(modelItem => item.ImageLocation)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.UserTypeId)
+                    @Html.DisplayFor(modelItem => item.UserType.Name)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.FullName)

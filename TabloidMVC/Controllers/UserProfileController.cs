@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using TabloidMVC.Models;
+using TabloidMVC.Models.ViewModels;
 using TabloidMVC.Repositories;
 
 namespace TabloidMVC.Controllers
@@ -95,21 +97,25 @@ namespace TabloidMVC.Controllers
         }
 
         // GET: UserProfileController/Edit/5
-        [Authorize]
         public ActionResult Edit(int id)
         {
+
             int profileId = GetCurrentUserProfileId();
 
             UserProfile userProfile = _userProfileRepository.GetUserProfileById(id);
+            UserProfileUserTypeViewModel vm = new UserProfileUserTypeViewModel();
+            vm.UserProfile = userProfile;
 
-            if (userProfile == null || userProfile.Id != profileId)
+            vm.UserTypes = _userProfileRepository.GetAllUserTypes();
+
+            if (userProfile == null)
             {
                 return NotFound();
             }
-
-            return View(userProfile);
+       
+            return View(vm);
+        
         }
-
         // POST: UserProfileController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]

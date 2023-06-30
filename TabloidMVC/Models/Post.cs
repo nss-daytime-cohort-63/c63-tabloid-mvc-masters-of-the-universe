@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace TabloidMVC.Models
 {
@@ -33,5 +34,6 @@ namespace TabloidMVC.Models
         [DisplayName("Author")]
         public int UserProfileId { get; set; }
         public UserProfile UserProfile { get; set; }
+        public List<Tag> Tags { get; set; }
     }
 }
