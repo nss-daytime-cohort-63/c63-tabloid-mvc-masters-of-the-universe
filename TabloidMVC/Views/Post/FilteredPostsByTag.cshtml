@@ -1,4 +1,4 @@
-﻿@model IEnumerable<TabloidMVC.Models.Post>
+﻿@model TabloidMVC.Models.ViewModels.FilterPostByTagViewModel
 
 @{
     ViewData["Title"] = "Filtered Posts By Tag";
@@ -6,21 +6,33 @@
 
 <div class="container pt-5">
     <h1>Filtered Posts</h1>
-
+    <form asp-action="PostsByTag" method="get">
+        <div class="form-group">
+            <label for="tagId">Filter by Tag:</label>
+            <select class="form-control" id="tagId" name="tagId">
+                <option value="">All Tags</option>
+                @foreach (var tag in Model.AllTags)
+                {
+                    <option value="@tag.Id">@tag.Name</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
     <table class="table table-striped">
         <!-- Table header -->
         <thead>
             <tr>
-                <th>@Html.DisplayNameFor(model => model.Title)</th>
-                <th>@Html.DisplayNameFor(model => model.UserProfileId)</th>
-                <th>@Html.DisplayNameFor(model => model.CategoryId)</th>
-                <th>@Html.DisplayNameFor(model => model.PublishDateTime)</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Category</th>
+                <th>Published</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             <!-- Loop through the filtered posts -->
-            @foreach (var item in Model)
+            @foreach (var item in Model.Posts)
             {
                 <tr>
                     <td>@Html.DisplayFor(modelItem => item.Title)</td>
