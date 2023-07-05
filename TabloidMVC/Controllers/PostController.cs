@@ -184,18 +184,22 @@ namespace TabloidMVC.Controllers
 
 
         //GET Edit
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public ActionResult Edit(int id)
         {
-
+            int profileId = GetCurrentUserProfileId();
+            UserProfile user = _userProfileRepository.GetUserProfileById(profileId);
             Post post = _postRepository.GetPostByPostId(id);
+            PostEditViewModel pevm = new PostEditViewModel();
+            pevm.Post = post;
+            pevm.CurrentUser = user;
 
             if (post == null)
             {
                 return NotFound();
             }
 
-            return View(post);
+            return View(pevm);
         }
 
         //POST Edit

@@ -1,4 +1,4 @@
-﻿@model TabloidMVC.Models.Post
+﻿@model TabloidMVC.Models.ViewModels.PostEditViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -13,55 +13,52 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
+                <label asp-for="Post.Title" class="control-label"></label>
+                <input asp-for="Post.Title" class="form-control" />
+                <span asp-validation-for="Post.Title" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Content" class="control-label"></label>
-                <input asp-for="Content" class="form-control" />
-                <span asp-validation-for="Content" class="text-danger"></span>
+                <label asp-for="Post.Content" class="control-label"></label>
+                <input asp-for="Post.Content" class="form-control" />
+                <span asp-validation-for="Post.Content" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ImageLocation" class="control-label"></label>
-                <input asp-for="ImageLocation" class="form-control" />
-                <span asp-validation-for="ImageLocation" class="text-danger"></span>
+                <label asp-for="Post.ImageLocation" class="control-label"></label>
+                <input asp-for="Post.ImageLocation" class="form-control" />
+                <span asp-validation-for="Post.ImageLocation" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="CreateDateTime" class="control-label"></label>
-                <input asp-for="CreateDateTime" class="form-control" />
-                <span asp-validation-for="CreateDateTime" class="text-danger"></span>
+                <label asp-for="Post.CreateDateTime" class="control-label"></label>
+                <input asp-for="Post.CreateDateTime" class="form-control" />
+                <span asp-validation-for="Post.CreateDateTime" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PublishDateTime" class="control-label"></label>
-                <input asp-for="PublishDateTime" class="form-control" />
-                <span asp-validation-for="PublishDateTime" class="text-danger"></span>
+                <label asp-for="Post.PublishDateTime" class="control-label"></label>
+                <input asp-for="Post.PublishDateTime" class="form-control" />
+                <span asp-validation-for="Post.PublishDateTime" class="text-danger"></span>
             </div>
 
-            @if(Model.UserProfile.UserTypeId == 1)
+            @if (Model.CurrentUser.UserTypeId == 1)
             {
-            <div class="form-group">
-                <label asp-for="IsApproved" class="control-label">Approval</label>
-                <select asp-for="IsApproved">
-                    <option value="True">Approved</option>
-                    <option value="False">Not Approved</option>
-                </select>
-                <span asp-validation-for="IsApproved" class="text-danger"></span>
+                <div class="form-group">
+                    <label asp-for="Post.IsApproved" class="control-label">Approval</label>
+                    <select asp-for="Post.IsApproved">
+                        <option value="True">Approved</option>
+                        <option value="False">Not Approved</option>
+                    </select>
+                    <span asp-validation-for="Post.IsApproved" class="text-danger"></span>
                     @*<input class="form-check-input" asp-for="IsApproved" /> @Html.DisplayNameFor(model => model.IsApproved)*@
-                
-            </div>
+
+                </div>
 
             }
             <div class="form-group">
-                <label asp-for="CategoryId" class="control-label"></label>
-                <input asp-for="CategoryId" class="form-control" />
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                <label asp-for="Post.CategoryId" class="control-label"></label>
+                <input asp-for="Post.CategoryId" class="form-control" />
+                <span asp-validation-for="Post.CategoryId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="UserProfileId" class="control-label"></label>
-                <input asp-for="UserProfileId" class="form-control" />
-                <span asp-validation-for="UserProfileId" class="text-danger"></span>
-            </div>
+            <input asp-for="Post.Id" class="form-control" type="hidden" value="@Model.Post.Id" />
+            <input asp-for="Post.UserProfileId" class="form-control" type="hidden" value="@Model.Post.UserProfileId" />
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
@@ -74,5 +71,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
