@@ -184,12 +184,11 @@ namespace TabloidMVC.Controllers
 
 
         //GET Edit
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id)
         {
-            int profileId = GetCurrentUserProfileId();
 
-            Post post = _postRepository.GetUserPostById(id, profileId);
+            Post post = _postRepository.GetPostByPostId(id);
 
             if (post == null)
             {
